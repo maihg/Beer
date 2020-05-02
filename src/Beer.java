@@ -1,19 +1,24 @@
 import javafx.collections.ObservableList;
 
+import javax.persistence.Entity;
+import javax.persistence.Id;
 import java.util.ArrayList;
+import java.util.List;
 
+@Entity
 public class Beer {
-
+    @Id
     private int id;
     private String name;
     private String type;
     private int timesMade = 0;
-    private ArrayList<Double> values;
-    private ObservableList<Instructions> recipe;
+    //private List<Double> values; // Passer visst dårlig her
+    //private ObservableList<Instructions> recipe;
 
     public Beer(){} // Empty constructor
 
     // get and set methods for all
+
     public int getId() {
         return id;
     }
@@ -46,7 +51,7 @@ public class Beer {
         this.timesMade = timesMade;
     }
 
-    public ArrayList<Double> getValues() {
+    /*public ArrayList<Double> getValues() {
         return values;
     }
 
@@ -60,5 +65,5 @@ public class Beer {
 
     public void setRecipe(ObservableList<Instructions> recipe) {
         this.recipe = recipe;
-    }
+    }*/
 }
