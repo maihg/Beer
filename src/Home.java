@@ -4,6 +4,7 @@ import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.control.TextArea;
 import javafx.scene.layout.BorderPane;
+import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
 import javafx.scene.text.Font;
 import javafx.scene.text.FontWeight;
@@ -18,13 +19,15 @@ public class Home {
         Label madeTheMost = new Label("Mekket mest: lager");
         TextArea centerArea = new TextArea("Skal komme en fin tabell her");
         centerArea.setEditable(false);
-        Button ongoingMakings = new Button("Se pågående mekkinger");
-        ongoingMakings.setOnAction(Controller::goToMakings);
+        Button newMakingBtn = new Button("Ny mekking");
+        // setOnAction
+        Button ongoingMakingsBtn = new Button("Se pågående mekkinger");
+        ongoingMakingsBtn.setOnAction(Controller::goToMakings);
 
         // Set up the layout
         // Helping panes
         VBox centerBox = new VBox(10);
-        centerBox.getChildren().addAll(madeTheMost, centerArea, ongoingMakings);
+        centerBox.getChildren().addAll(madeTheMost, centerArea, new HBox(newMakingBtn, ongoingMakingsBtn));
         // Aligning stuff
         pane.setTop(title);
         pane.setCenter(centerBox);

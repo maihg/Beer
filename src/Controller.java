@@ -10,6 +10,7 @@ import javafx.stage.Stage;
 
 // This will be my Controller-class
 public class Controller extends Application {
+    private static Stage stage;
     private static Home home;
     private static Makings makings;
     private static VBox contents;
@@ -19,11 +20,13 @@ public class Controller extends Application {
 
     @Override
     public void start(Stage stage) throws Exception {
+        Controller.stage = stage;
         contents = new VBox(10);
         home = new Home();
         makings = new Makings();
 
         Button homeBtn = new Button("Hjem");
+        homeBtn.setOnAction(Controller::goToHome);
         Button goBackBtn = new Button("<-- Tilbake");
         goBackBtn.setOnAction(e -> goBack(e, lastScene));
         VBox top = new VBox(homeBtn, goBackBtn);
@@ -37,11 +40,13 @@ public class Controller extends Application {
 
 
     private static void goToHome(ActionEvent event) {
+        stage.setTitle("MH -- Hjem");
         contents.getChildren().set(1, home.getPane());
         changeNewScene("home");
     }
 
     public static void goToMakings(ActionEvent event) {
+        stage.setTitle("MH -- Pågående mekkinger");
         contents.getChildren().set(1, makings.getPane());
         changeNewScene("makings");
     }
