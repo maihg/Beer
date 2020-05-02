@@ -1,19 +1,20 @@
+package GUI;
+
 import javafx.application.Application;
 import javafx.event.ActionEvent;
 import javafx.geometry.Pos;
 import javafx.scene.Scene;
-import javafx.scene.control.Button;
-import javafx.scene.control.Label;
-import javafx.scene.layout.HBox;
+import javafx.scene.control.*;
 import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
 
-// This will be my Controller-class
+// This will be my GUI.Controller-class
 public class Controller extends Application {
     private static Stage stage;
     private static Home home;
     private static Makings makings;
     private static VBox contents;
+    private static VBox top;
 
     private static String lastScene = "home";
     private static String newScene = "home";
@@ -29,7 +30,7 @@ public class Controller extends Application {
         homeBtn.setOnAction(Controller::goToHome);
         Button goBackBtn = new Button("<-- Tilbake");
         goBackBtn.setOnAction(e -> goBack(e, lastScene));
-        VBox top = new VBox(homeBtn, goBackBtn);
+        top = new VBox(homeBtn, goBackBtn);
         contents.getChildren().addAll(top, home.getPane());
         contents.setAlignment(Pos.TOP_CENTER);
 
