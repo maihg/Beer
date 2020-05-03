@@ -1,24 +1,32 @@
 import javafx.collections.ObservableList;
 
-import javax.persistence.Entity;
-import javax.persistence.Id;
+import javax.persistence.*;
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 
 @Entity
-public class Beer {
+public class Beer implements Serializable {
     @Id
+    @GeneratedValue // Blir det AUTO nå?
     private int id;
     private String name;
     private String type;
-    private int timesMade = 0;
-    //private List<Double> values; // Passer visst dårlig her
-    //private ObservableList<Instructions> recipe;
+    private double value1;
+    private double value2;
+    //private List<Instructions> recipe = new ArrayList<>();
 
     public Beer(){} // Empty constructor
 
-    // get and set methods for all
+    public Beer(String name, String type) throws IllegalArgumentException{
+        if(name == null || type == null) throw new IllegalArgumentException("Name and type cannot be empty (null)");
+        this.name = name;
+        this.type = type;
+        this.value1 = -1;
+        this.value2 = -1;
+    }
 
+    // get and set methods for all
     public int getId() {
         return id;
     }
@@ -43,27 +51,39 @@ public class Beer {
         this.type = type;
     }
 
-    public int getTimesMade() {
-        return timesMade;
+    public double getValue1() {
+        return value1;
     }
 
-    public void setTimesMade(int timesMade) {
-        this.timesMade = timesMade;
+    public void setValue1(double value1) {
+        this.value1 = value1;
     }
 
-    /*public ArrayList<Double> getValues() {
-        return values;
+    public double getValue2() {
+        return value2;
     }
 
-    public void setValues(ArrayList<Double> values) {
-        this.values = values;
+    public void setValue2(double value2) {
+        this.value2 = value2;
     }
 
-    public ObservableList<Instructions> getRecipe() {
+    /*@OneToMany
+    public List<Instructions> getRecipe() {
         return recipe;
     }
 
-    public void setRecipe(ObservableList<Instructions> recipe) {
+    public void setRecipe(List<Instructions> recipe) {
         this.recipe = recipe;
     }*/
+
+    @Override
+    public String toString() {
+        return "Beer{" +
+                "id=" + id +
+                ", name='" + name + '\'' +
+                ", type='" + type + '\'' +
+                ", value1=" + value1 +
+                ", value2=" + value2 +
+                '}';
+    }
 }

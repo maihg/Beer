@@ -5,6 +5,9 @@ import javafx.event.ActionEvent;
 import javafx.geometry.Pos;
 import javafx.scene.Scene;
 import javafx.scene.control.*;
+import javafx.scene.layout.HBox;
+import javafx.scene.layout.Priority;
+import javafx.scene.layout.Region;
 import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
 
@@ -14,7 +17,7 @@ public class Controller extends Application {
     private static Home home;
     private static Makings makings;
     private static VBox contents;
-    private static VBox top;
+    private static HBox top;
 
     private static String lastScene = "home";
     private static String newScene = "home";
@@ -30,7 +33,11 @@ public class Controller extends Application {
         homeBtn.setOnAction(Controller::goToHome);
         Button goBackBtn = new Button("<-- Tilbake");
         goBackBtn.setOnAction(e -> goBack(e, lastScene));
-        top = new VBox(homeBtn, goBackBtn);
+        VBox topV = new VBox(homeBtn, goBackBtn);
+        Button fileHandleBtn = new Button("Filhåndtering");
+        Region region = new Region();
+        HBox.setHgrow(region, Priority.ALWAYS);
+        top = new HBox(topV, region, fileHandleBtn);
         contents.getChildren().addAll(top, home.getPane());
         contents.setAlignment(Pos.TOP_CENTER);
 
