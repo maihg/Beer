@@ -1,3 +1,5 @@
+package beer;
+
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
@@ -74,7 +76,7 @@ public class Instructions implements Serializable {
 
     @Override
     public String toString() {
-        return "Instructions{" +
+        return "beer.Instructions{" +
                 "instructionId=" + instructionId +
                 ", description='" + description + '\'' +
                 ", daysAfterStart=" + daysAfterStart +

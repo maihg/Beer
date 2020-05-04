@@ -11,12 +11,12 @@
 
         <properties>
             <property name="javax.persistence.jdbc.driver" value="org.apache.derby.jdbc.EmbeddedDriver"/>
-            <property name="javax.persistence.jdbc.url" value="jdbc:derby:beerdb;create=true"/>
+            <property name="javax.persistence.jdbc.url" value="jdbc:derby:beer;create=true"/>
             <property name="javax.persistence.jdbc.user" value="app"/>
             <property name="javax.persistence.jdbc.password" value="app"/>
 
             <property name="eclipselink.target-database" value="Derby"/>
-            <property name="eclipselink.ddl-generation" value="drop-and-create-tables"/> <!-- Fjern drop-and hvis du ikke vil nulle ut ting hver gang-->
+            <property name="eclipselink.ddl-generation" value="create-tables"/> <!-- Fjern drop-and hvis du ikke vil nulle ut ting hver gang-->
             <property name="eclipselink.logging.level" value="INFO"/> <!-- FINE, INFO, ALL -->
         </properties>
     </persistence-unit>

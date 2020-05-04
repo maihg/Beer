@@ -1,7 +1,10 @@
+package beer;
+
 import javafx.collections.ObservableList;
 
 import javax.persistence.*;
 import java.io.Serializable;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -14,16 +17,17 @@ public class Beer implements Serializable {
     private String type;
     private double value1;
     private double value2;
-    //private List<Instructions> recipe = new ArrayList<>();
+    private LocalDateTime startTime;
 
     public Beer(){} // Empty constructor
 
-    public Beer(String name, String type) throws IllegalArgumentException{
+    public Beer(String name, String type, LocalDateTime startTime) throws IllegalArgumentException{
         if(name == null || type == null) throw new IllegalArgumentException("Name and type cannot be empty (null)");
         this.name = name;
         this.type = type;
         this.value1 = -1;
         this.value2 = -1;
+        this.startTime = startTime;
     }
 
     // get and set methods for all
@@ -67,23 +71,32 @@ public class Beer implements Serializable {
         this.value2 = value2;
     }
 
+    public LocalDateTime getStartTime() {
+        return startTime;
+    }
+
+    public void setStartTime(LocalDateTime startTime) {
+        this.startTime = startTime;
+    }
+
     /*@OneToMany
-    public List<Instructions> getRecipe() {
+    public List<beer.Instructions> getRecipe() {
         return recipe;
     }
 
-    public void setRecipe(List<Instructions> recipe) {
+    public void setRecipe(List<beer.Instructions> recipe) {
         this.recipe = recipe;
     }*/
 
     @Override
     public String toString() {
-        return "Beer{" +
+        return "beer.Beer{" +
                 "id=" + id +
                 ", name='" + name + '\'' +
                 ", type='" + type + '\'' +
                 ", value1=" + value1 +
                 ", value2=" + value2 +
+                ", startTime=" + startTime +
                 '}';
     }
 }
