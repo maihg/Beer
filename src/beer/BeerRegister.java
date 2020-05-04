@@ -56,6 +56,9 @@ public class BeerRegister implements Serializable {
         List<Beer> allBeers = getAllBeers();
         List<String> beers = new ArrayList<>();
         for(Beer beer: allBeers){
+            if(beers.size()==0 || !beers.contains(beer.getName())){
+                beers.add(beer.getName());
+            }
         }
         return beers;
     }
@@ -162,7 +165,7 @@ public class BeerRegister implements Serializable {
         Instructions nextInstruction = null;
 
         for (Instructions instruction : instructions) {
-            date = now.plusDays(instruction.getDaysAfterStart());
+            date = beer.getStartTime().plusDays(instruction.getDaysAfterStart());
             if (!date.isBefore(now) && (next== null || date.isBefore(next))) {
                 next = date;
                 nextInstruction = instruction;
@@ -282,10 +285,13 @@ public class BeerRegister implements Serializable {
 
             System.out.println("-- Finding the last instruction");
             System.out.println(register.getLastInstruction("Henriks beste").toString());
-            System.out.println("Date for last instruction on beer1 (Henriks beste): " + register.getLastDayOfMaking(beer1));
+            System.out.println("Date for last instruction on beer1 (Henriks beste): " + register.getLastDayOfMaking(beer3));
 
             System.out.println("-- Ongoing beers");
             register.getOngoingBeers().forEach(System.out::println);
+
+            System.out.println("-- Next Instruction");
+            System.out.println(register.getNextInstruction(beer3));
 
             System.out.println("-- All beer types");
             register.getAllBeerTypes().forEach(System.out::println);
