@@ -236,6 +236,41 @@ public class BeerRegister implements Serializable {
         }
     }
 
+    public void addNotesToBeer(String beerName){
+        EntityManager em = getEM();
+        try {
+            Notes note = new Notes(beerName);
+            note.setNotes("Notater");
+            em.getTransaction().begin();
+            em.persist(note);
+            em.getTransaction().commit();
+        }finally {
+            closeEM(em);
+        }
+    }
+
+    public Notes findNotes(String beerName) {
+        EntityManager em = getEM();
+        try {
+            return em.find(Notes.class, beerName);
+        }finally {
+            closeEM(em);
+        }
+    }
+
+    public void editNotes(String newNotes, String beerName){
+        EntityManager em = getEM();
+        try {
+            Notes notes = findNotes(beerName);
+            notes.setNotes(newNotes);
+            em.getTransaction().begin();
+            em.merge(notes);
+            em.getTransaction().commit();
+        }finally {
+            closeEM(em);
+        }
+    }
+
 
     private EntityManager getEM(){
         return emf.createEntityManager();
@@ -296,6 +331,10 @@ public class BeerRegister implements Serializable {
             System.out.println("-- All beer types");
             register.getAllBeerTypes().forEach(System.out::println);
 
+            register.addNotesToBeer("Henriks beste");
+            register.addNotesToBeer("Sommerøl");
+            register.addNotesToBeer("BøffBay");
+            register.addNotesToBeer("Mai(s)maker");
 
         }finally {
             assert emf != null;

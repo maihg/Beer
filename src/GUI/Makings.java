@@ -2,6 +2,7 @@ package GUI;
 
 import beer.Beer;
 import beer.BeerRegister;
+import javafx.beans.binding.Bindings;
 import javafx.beans.property.ReadOnlyObjectWrapper;
 import javafx.beans.property.ReadOnlyStringWrapper;
 import javafx.collections.FXCollections;
@@ -51,6 +52,8 @@ public class Makings {
         TableView<Beer> tableView = new TableView<>();
         tableView.setItems(FXCollections.observableArrayList(register.getOngoingBeers()));
         tableView.getColumns().addAll(descriptionColumn, daysColumn, hoursColumn);
+        tableView.setFixedCellSize(25);
+        tableView.prefHeightProperty().bind(tableView.fixedCellSizeProperty().multiply(Bindings.size(tableView.getItems()).add(1.01)));
 
         // Add listener for clicks on row
         tableView.setOnMousePressed(mouseEvent -> {

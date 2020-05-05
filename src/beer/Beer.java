@@ -11,7 +11,7 @@ import java.util.List;
 @Entity
 public class Beer implements Serializable {
     @Id
-    @GeneratedValue // Blir det AUTO nå?
+    @GeneratedValue // Blir det AUTO nå? Ja.
     private int id;
     private String name;
     private String type;
