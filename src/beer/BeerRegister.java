@@ -52,6 +52,18 @@ public class BeerRegister implements Serializable {
         return ongoingBeers;
     }
 
+    public List<Beer> getComingBeers(){
+        List<Beer> allBeers = getAllBeers();
+        List<Beer> comingBeers = new ArrayList<>();
+        for(Beer beer: allBeers){
+            LocalDate now = LocalDateTime.now().toLocalDate();
+            if(now.isBefore(beer.getStartTime().toLocalDate())){
+                comingBeers.add(beer);
+            }
+        }
+        return comingBeers;
+    }
+
     public List<String> getAllBeerTypes(){
         List<Beer> allBeers = getAllBeers();
         List<String> beers = new ArrayList<>();
@@ -88,6 +100,17 @@ public class BeerRegister implements Serializable {
             closeEM(em);
         }
         return true;
+    }
+
+    public void editBeer(Beer beer){
+        EntityManager em = getEM();
+        try {
+            em.getTransaction().begin();
+            em.merge(beer);
+            em.getTransaction().commit();
+        }finally {
+            closeEM(em);
+        }
     }
 
     public int noOfTimesMade(String name){
@@ -165,8 +188,8 @@ public class BeerRegister implements Serializable {
         Instructions nextInstruction = null;
 
         for (Instructions instruction : instructions) {
-            date = beer.getStartTime().plusDays(instruction.getDaysAfterStart());
-            if (!date.isBefore(now) && (next== null || date.isBefore(next))) {
+            date = beer.getStartTime().plusDays(instruction.getDaysAfterStart()).plusHours(instruction.getHours());
+            if ((!date.isBefore(now) || date.isEqual(now)) && (next == null || date.isBefore(next))) {
                 next = date;
                 nextInstruction = instruction;
             }
@@ -208,7 +231,7 @@ public class BeerRegister implements Serializable {
         }finally {
             closeEM(em);
         }
-        return instructions;
+        return instructions; // TODO: make sure this list is sorted so that the first steps actually comes first in the table view
     }
 
 
@@ -312,6 +335,7 @@ public class BeerRegister implements Serializable {
             //System.out.println("1: " + try1 + ", 2: " + try2 + ", 3: "+ try3 +", 4: "+ try4);
 
             register.addInstructionToBeer("Start", 0, 0, "Henriks beste");
+            register.addInstructionToBeer("Ha i humle", 0, 2, "Henriks beste");
             register.addInstructionToBeer("Tapp på flaske", 28, 0, "Henriks beste");
             register.addInstructionToBeer("Noe", 10,0, "Sommerøl");
             List<Instructions> recipe = register.getInstructionsForBeer("Henriks beste");
