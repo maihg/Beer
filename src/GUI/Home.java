@@ -43,9 +43,12 @@ public class Home {
         buttonContainer.setAlignment(Pos.CENTER);
         centerBox.getChildren().addAll(madeTheMost, tableView, buttonContainer);
         centerBox.setAlignment(Pos.CENTER);
+        ScrollPane scrollPane = new ScrollPane(centerBox);
+        scrollPane.setHbarPolicy(ScrollPane.ScrollBarPolicy.NEVER);
+        scrollPane.setVbarPolicy(ScrollPane.ScrollBarPolicy.AS_NEEDED);
         // Aligning stuff
         pane.setTop(title);
-        pane.setCenter(centerBox);
+        pane.setCenter(scrollPane);
         BorderPane.setAlignment(title, Pos.TOP_CENTER);
         pane.setPadding(new Insets(10,10,10,10)); // top, right, bottom, left
 

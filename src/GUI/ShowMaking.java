@@ -3,6 +3,7 @@ package GUI;
 import beer.Beer;
 import beer.BeerRegister;
 import beer.Instructions;
+import beer.SpecificInstruction;
 import javafx.beans.binding.Bindings;
 import javafx.beans.property.ReadOnlyObjectWrapper;
 import javafx.beans.property.ReadOnlyStringWrapper;
@@ -24,6 +25,7 @@ import java.time.format.DateTimeFormatter;
 public class ShowMaking {
     private final BorderPane pane = new BorderPane();
     private Beer selectedBeer;
+    private int instructionId;
     private final BeerRegister register = Controller.getRegister();
     private ObservableList<Instructions> tableWrapper;
 
@@ -55,8 +57,11 @@ public class ShowMaking {
 
         VBox centerBox = new VBox(10);
         centerBox.getChildren().addAll(tableView, changeStartTimeBox);
+        ScrollPane scrollPane = new ScrollPane(centerBox);
+        scrollPane.setHbarPolicy(ScrollPane.ScrollBarPolicy.NEVER);
+        scrollPane.setVbarPolicy(ScrollPane.ScrollBarPolicy.AS_NEEDED);
         pane.setTop(title);
-        pane.setCenter(centerBox);
+        pane.setCenter(scrollPane);
         pane.setPadding(new Insets(10,10,10,10));
 
         return pane;
@@ -70,7 +75,7 @@ public class ShowMaking {
         whenColumn.setCellValueFactory(data -> new ReadOnlyObjectWrapper<>(selectedBeer.getStartTime().plusDays(data.getValue().getDaysAfterStart()).plusHours(data.getValue().getHours())));
         //daysColumn.setStyle("-fx-alignment: center;");
         TableColumn<Instructions, String> doneColumn = new TableColumn<>("Gjort");
-        doneColumn.setCellValueFactory(data -> new ReadOnlyStringWrapper("-")); // Er noe som heter CheckBox. Kan nok være fint å bruke
+        doneColumn.setCellValueFactory(data -> new ReadOnlyStringWrapper(register.findSpecificInstruction(data.getValue().getInstructionId(), selectedBeer.getId()).isDone() ? "Ja":"Nei")); // Er noe som heter CheckBox. Kan nok være fint å bruke
         doneColumn.setStyle("-fx-alignment: center;");
 
         // Create the table instance
@@ -84,6 +89,23 @@ public class ShowMaking {
         whenColumn.setMaxWidth( 1f * Integer.MAX_VALUE * 30 ); // 30% width
         doneColumn.setMaxWidth( 1f * Integer.MAX_VALUE * 20 ); // 20% width
 
+        // Add listener for clicks on row
+        tableView.setOnMousePressed(mouseEvent -> {
+            if(mouseEvent.isPrimaryButtonDown()){
+                int selected = tableView.getSelectionModel().getSelectedItem().getInstructionId();
+
+                if(mouseEvent.getClickCount() == 1){
+                    instructionId = selected;
+                }else if(mouseEvent.getClickCount() == 2){
+                    System.out.println("--> Gonna change done ");
+                    SpecificInstruction instruction = register.findSpecificInstruction(instructionId, selectedBeer.getId());
+                    instruction.setDone(!instruction.isDone());
+                    register.editSpecificInstruction(instruction);
+                    updateTable();
+                }
+            }
+        });
+
         return tableView;
     }
 
@@ -93,7 +115,7 @@ public class ShowMaking {
         return tableWrapper;
     }
 
-    public void updateTable(){
+    private void updateTable(){
         this.tableWrapper.setAll(register.getInstructionsForBeer(selectedBeer.getName()));
     }
 }

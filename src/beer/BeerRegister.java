@@ -7,10 +7,7 @@ import javafx.beans.property.SimpleStringProperty;
 import javafx.beans.value.ObservableValue;
 import javafx.scene.control.cell.PropertyValueFactory;
 
-import javax.persistence.EntityManager;
-import javax.persistence.EntityManagerFactory;
-import javax.persistence.Persistence;
-import javax.persistence.Query;
+import javax.persistence.*;
 import java.io.Serializable;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -234,6 +231,53 @@ public class BeerRegister implements Serializable {
         return instructions; // TODO: make sure this list is sorted so that the first steps actually comes first in the table view
     }
 
+    public void addSpecificInstruction(SpecificInstruction specificInstruction){
+        EntityManager em = getEM();
+        try {
+            em.getTransaction().begin();
+            em.persist(specificInstruction);
+            em.getTransaction().commit();
+        }finally {
+            closeEM(em);
+        }
+    }
+
+    public void editSpecificInstruction(SpecificInstruction specificInstruction){
+        EntityManager em = getEM();
+        try {
+            em.getTransaction().begin();
+            em.merge(specificInstruction);
+            em.getTransaction().commit();
+        }finally {
+            closeEM(em);
+        }
+    }
+
+    public SpecificInstruction findSpecificInstruction(int instructionId, int beerID){
+        List<SpecificInstruction> instructions = getAllSpecificInstructions(beerID);
+        for(SpecificInstruction i: instructions){
+            if(i.getInstructionId() == instructionId) return i;
+        }
+        return null;
+    }
+
+    private List<SpecificInstruction> getAllSpecificInstructions(int beerId){
+        EntityManager em = getEM();
+        List<SpecificInstruction> instructions = new ArrayList<>();
+        try {
+            em.getTransaction().begin();
+            Query q = em.createQuery("SELECT OBJECT(o) FROM SpecificInstruction o");
+            instructions = q.getResultList();
+            em.getTransaction().commit();
+        }finally {
+            closeEM(em);
+        }
+
+        if(instructions != null){
+            instructions.removeIf(s -> s.getBeerId() != beerId);
+        }
+        return instructions;
+    }
 
     public boolean regValues(Beer beer, double value, int day){
         // Legg til verdi i beer-objektet dag 1 (value1) eller dag 2 (value2)
@@ -359,6 +403,16 @@ public class BeerRegister implements Serializable {
             register.addNotesToBeer("Sommerøl");
             register.addNotesToBeer("BøffBay");
             register.addNotesToBeer("Mai(s)maker");
+
+            System.out.println("-- Adding specific instructions to beers");
+            ArrayList<Beer> beerList = new ArrayList<>();
+            beerList.add(beer1); beerList.add(beer2); beerList.add(beer3); beerList.add(beer4); beerList.add(beer5); beerList.add(beer6);
+            for(Beer b: beerList) {
+                for (Instructions i : register.getInstructionsForBeer(b.getName())) {
+                    SpecificInstruction instruction = new SpecificInstruction(i.getInstructionId(), b.getId());
+                    register.addSpecificInstruction(instruction);
+                }
+            }
 
         }finally {
             assert emf != null;
