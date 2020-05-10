@@ -69,7 +69,7 @@ public class Controller extends Application {
         contents.setAlignment(Pos.TOP_CENTER);
 
         stage.setTitle("MH -- Hjem");
-        Scene scene = new Scene(contents, 500, 400);
+        Scene scene = new Scene(contents, 600, 600);
         scene.getStylesheets().add("GUI/styles.css");
         stage.setScene(scene);
         stage.show();

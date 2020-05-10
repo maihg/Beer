@@ -50,6 +50,8 @@ public class ShowRecipe {
             alert.setHeaderText("Endringer lagret");
             String s ="Dine notatendringer er nå lagret";
             alert.setContentText(s);
+            DialogPane alertPane = alert.getDialogPane();
+            alertPane.getStylesheets().add("GUI/styles.css");
             alert.show();
         });
 

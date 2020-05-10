@@ -42,12 +42,24 @@ public class ShowMaking {
         TableView<Instructions> tableView = createTable();
         TextArea notesArea = new TextArea();
         notesArea.setText(register.findBeer(selectedBeer).getNotes());
-        notesArea.setEditable(true);
+        notesArea.setEditable(true);Button updateNotes = new Button("Lagre notatendringer");
+        updateNotes.setOnAction(e -> {
+            selectedBeer.setNotes(notesArea.getText());
+            register.editBeer(selectedBeer);
+            Alert alert = new Alert(Alert.AlertType.INFORMATION);
+            alert.setTitle("Info");
+            alert.setHeaderText("Endringer lagret");
+            String s ="Dine notatendringer er nå lagret";
+            alert.setContentText(s);
+            DialogPane alertPane = alert.getDialogPane();
+            alertPane.getStylesheets().add("GUI/styles.css");
+            alert.show();
+        });
         GridPane valuesPane = getValuesPane();
 
 
         VBox centerBox = new VBox(10);
-        centerBox.getChildren().addAll(tableView, notesArea, valuesPane);
+        centerBox.getChildren().addAll(tableView, notesArea,updateNotes, valuesPane);
         ScrollPane scrollPane = new ScrollPane(centerBox);
         scrollPane.setHbarPolicy(ScrollPane.ScrollBarPolicy.NEVER);
         scrollPane.setVbarPolicy(ScrollPane.ScrollBarPolicy.AS_NEEDED);
