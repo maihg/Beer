@@ -110,7 +110,7 @@ public class BeerRegister implements Serializable {
         }
     }
 
-    public int noOfTimesMade(String name){
+    private int noOfTimesMade(String name){
         EntityManager em = getEM();
         Long ans;
         try {
@@ -127,6 +127,33 @@ public class BeerRegister implements Serializable {
         int times = noOfTimesMade(name);
         ObservableValue<Integer> no = new SimpleIntegerProperty(times).asObject();
         return no;
+    }
+
+    public List<Beer> getMakingsOfType(String beerName){
+        EntityManager em = getEM();
+        try {
+            Query q = em.createQuery("SELECT OBJECT(o) FROM Beer o WHERE o.name LIKE :name").setParameter("name", beerName);
+            return q.getResultList();
+        }finally {
+            closeEM(em);
+        }
+    }
+
+    public String mostMadeBeer(){
+        List<String> beers = getAllBeerTypes();
+        String theMost = "-";
+        int mostNo = 0;
+        for (String beer: beers){
+            int times = noOfTimesMade(beer);
+            if (times > mostNo){
+                mostNo = times;
+                theMost = beer;
+            }else if(times == mostNo){
+                theMost += ", " + beer;
+            }
+        }
+
+        return theMost;
     }
 
     /*
@@ -186,7 +213,8 @@ public class BeerRegister implements Serializable {
 
         for (Instructions instruction : instructions) {
             date = beer.getStartTime().plusDays(instruction.getDaysAfterStart()).plusHours(instruction.getHours());
-            if ((!date.isBefore(now) || date.isEqual(now)) && (next == null || date.isBefore(next))) {
+            boolean done = findSpecificInstruction(instruction.getInstructionId(), beer.getId()).isDone();
+            if ((!date.isBefore(now) || date.isEqual(now) || !done) && (next == null || date.isBefore(next))) {
                 next = date;
                 nextInstruction = instruction;
             }
@@ -289,7 +317,7 @@ public class BeerRegister implements Serializable {
         return ready(beer); // Evnt. ta inn beerId og ha bruk en findmetode for å finne riktig objekt
     }
 
-    private boolean ready(Beer beer){
+    public boolean ready(Beer beer){
         if(beer.getValue1() == -1 && beer.getValue2() == -1) return false;
         return Math.abs(beer.getValue1() - beer.getValue2()) <= 0.1; // TODO: sjekk - verdi ok?
     }
@@ -303,6 +331,7 @@ public class BeerRegister implements Serializable {
         }
     }
 
+    // OBS - these three notes methods are connected to the Notes-class and are general for a type of beer (e.g. "Sommerøl")
     public void addNotesToBeer(String beerName){
         EntityManager em = getEM();
         try {
@@ -355,7 +384,7 @@ public class BeerRegister implements Serializable {
 
             Beer beer1 = new Beer("Henriks beste", "Lager", LocalDateTime.of(2020, 1, 13,0, 0));
             Beer beer2 = new Beer("Sommerøl", "Pils", LocalDateTime.of(2020, 6, 20, 12, 0));
-            Beer beer3 = new Beer("Henriks beste", "Lager", LocalDateTime.of(2020, 5, 3, 0,0));
+            Beer beer3 = new Beer("Henriks beste", "Lager", LocalDateTime.of(2020, 5, 9, 0,0));
             Beer beer4 = new Beer("Sommerøl", "Pils", LocalDateTime.of(2020, 5, 1, 0,0));
             Beer beer5 = new Beer("BøffBay", "Lager", LocalDateTime.of(2020, 5, 3, 0,0));
             Beer beer6 = new Beer("Mai(s)maker", "Pils", LocalDateTime.of(2020, 5, 2, 0,0));
@@ -386,6 +415,16 @@ public class BeerRegister implements Serializable {
             System.out.println("-- RECIPE for Henriks beste");
             for(Instructions i: recipe) System.out.println(i.toString());
 
+            System.out.println("-- Adding specific instructions to beers");
+            ArrayList<Beer> beerList = new ArrayList<>();
+            beerList.add(beer1); beerList.add(beer2); beerList.add(beer3); beerList.add(beer4); beerList.add(beer5); beerList.add(beer6);
+            for(Beer b: beerList) {
+                for (Instructions i : register.getInstructionsForBeer(b.getName())) {
+                    SpecificInstruction instruction = new SpecificInstruction(i.getInstructionId(), b.getId());
+                    register.addSpecificInstruction(instruction);
+                }
+            }
+
             System.out.println("-- Finding the last instruction");
             System.out.println(register.getLastInstruction("Henriks beste").toString());
             System.out.println("Date for last instruction on beer1 (Henriks beste): " + register.getLastDayOfMaking(beer3));
@@ -404,15 +443,6 @@ public class BeerRegister implements Serializable {
             register.addNotesToBeer("BøffBay");
             register.addNotesToBeer("Mai(s)maker");
 
-            System.out.println("-- Adding specific instructions to beers");
-            ArrayList<Beer> beerList = new ArrayList<>();
-            beerList.add(beer1); beerList.add(beer2); beerList.add(beer3); beerList.add(beer4); beerList.add(beer5); beerList.add(beer6);
-            for(Beer b: beerList) {
-                for (Instructions i : register.getInstructionsForBeer(b.getName())) {
-                    SpecificInstruction instruction = new SpecificInstruction(i.getInstructionId(), b.getId());
-                    register.addSpecificInstruction(instruction);
-                }
-            }
 
         }finally {
             assert emf != null;

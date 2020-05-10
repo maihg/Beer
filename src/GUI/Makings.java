@@ -8,10 +8,7 @@ import javafx.beans.property.ReadOnlyStringWrapper;
 import javafx.collections.FXCollections;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
-import javafx.scene.control.Label;
-import javafx.scene.control.ScrollPane;
-import javafx.scene.control.TableColumn;
-import javafx.scene.control.TableView;
+import javafx.scene.control.*;
 import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.VBox;
@@ -28,18 +25,18 @@ public class Makings {
 
     public BorderPane getPane() {
         Label title = new Label("Pågående mekkinger");
-        title.setFont(Font.font("Calibri", FontWeight.BOLD,18));
+        title.setId("Title");
         TableView<Beer> tableView1 = createTable("ongoing");
         TableView<Beer> tableView2 = createTable("coming");
         Label title2 = new Label("Kommende mekkinger");
-        title2.setFont(Font.font("Calibri", FontWeight.BOLD, FontPosture.ITALIC, 14));
-        title2.setAlignment(Pos.CENTER);
+        title2.setId("Subtitle");
 
         VBox centerBox = new VBox(10);
         centerBox.getChildren().addAll(tableView1, title2, tableView2);
         ScrollPane centerScroll = new ScrollPane(centerBox);
         centerScroll.setHbarPolicy(ScrollPane.ScrollBarPolicy.NEVER);
         centerScroll.setVbarPolicy(ScrollPane.ScrollBarPolicy.AS_NEEDED);
+        centerScroll.setFitToWidth(true);
         pane.setTop(title);
         pane.setCenter(centerBox);
         BorderPane.setAlignment(title, Pos.TOP_CENTER);
@@ -52,13 +49,14 @@ public class Makings {
         // Set up the columns
         TableColumn<Beer, String> descriptionColumn = new TableColumn<>("Øl");
         descriptionColumn.setCellValueFactory(new PropertyValueFactory<>("name"));
-        descriptionColumn.setMinWidth(139);
+        //descriptionColumn.setMinWidth(139);
         TableColumn<Beer, String> daysColumn = new TableColumn<>("Hva");
         daysColumn.setCellValueFactory(data -> new ReadOnlyStringWrapper(register.getNextInstructionDescription(data.getValue())));
-        daysColumn.setMinWidth(200);
+        //daysColumn.setMinWidth(200);
         TableColumn<Beer, LocalDateTime> hoursColumn = new TableColumn<>("Dato");
         hoursColumn.setCellValueFactory(data -> new ReadOnlyObjectWrapper<>(register.getNextInstructionDate(data.getValue())));
-        hoursColumn.setMinWidth(139);
+        hoursColumn.setMinWidth(110);
+        // TODO: gjør datoen rød dersom datoen er forbi og instruksjonen !done
 
         // Create the table instance
         TableView<Beer> tableView = new TableView<>();
@@ -70,6 +68,10 @@ public class Makings {
         tableView.getColumns().addAll(descriptionColumn, daysColumn, hoursColumn);
         tableView.setFixedCellSize(25);
         tableView.prefHeightProperty().bind(tableView.fixedCellSizeProperty().multiply(Bindings.size(tableView.getItems()).add(1.01)));
+        tableView.setColumnResizePolicy( TableView.CONSTRAINED_RESIZE_POLICY );
+        descriptionColumn.setMaxWidth( 1f * Integer.MAX_VALUE * 50 ); // 50% width
+        daysColumn.setMaxWidth( 1f * Integer.MAX_VALUE * 30 ); // 30% width
+        hoursColumn.setMaxWidth( 1f * Integer.MAX_VALUE * 20 ); // 20% width
 
         // Add listener for clicks on row
         tableView.setOnMousePressed(mouseEvent -> {

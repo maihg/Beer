@@ -56,9 +56,6 @@ public class Controller extends Application {
         showRecipe = new ShowRecipe();
         showMaking = new ShowMaking();
 
-        //this.homeTable = createHomeTable();
-        //home.setCenterArea(homeTable);
-
         Button homeBtn = new Button("Hjem");
         homeBtn.setOnAction(Controller::goToHome);
         Button goBackBtn = new Button("<-- Tilbake");
@@ -71,8 +68,10 @@ public class Controller extends Application {
         contents.getChildren().addAll(top, home.getPane());
         contents.setAlignment(Pos.TOP_CENTER);
 
-        stage.setTitle("MH");
-        stage.setScene(new Scene(contents, 500, 400));
+        stage.setTitle("MH -- Hjem");
+        Scene scene = new Scene(contents, 500, 400);
+        scene.getStylesheets().add("GUI/styles.css");
+        stage.setScene(scene);
         stage.show();
     }
 

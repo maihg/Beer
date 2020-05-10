@@ -17,7 +17,9 @@ public class Beer implements Serializable {
     private String type;
     private double value1;
     private double value2;
+    private double OG;
     private LocalDateTime startTime;
+    private String notes;
 
     public Beer(){} // Empty constructor
 
@@ -27,7 +29,9 @@ public class Beer implements Serializable {
         this.type = type;
         this.value1 = -1;
         this.value2 = -1;
+        this.OG = -1;
         this.startTime = startTime;
+        this.notes = "Notater";
     }
 
     // get and set methods for all
@@ -71,12 +75,28 @@ public class Beer implements Serializable {
         this.value2 = value2;
     }
 
+    public double getOG() {
+        return OG;
+    }
+
+    public void setOG(double OG) {
+        this.OG = OG;
+    }
+
     public LocalDateTime getStartTime() {
         return startTime;
     }
 
     public void setStartTime(LocalDateTime startTime) {
         this.startTime = startTime;
+    }
+
+    public String getNotes() {
+        return notes;
+    }
+
+    public void setNotes(String notes) {
+        this.notes = notes;
     }
 
     /*@OneToMany
