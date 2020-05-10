@@ -12,12 +12,14 @@ public class SpecificInstruction {
     private int instructionId;
     private int beerId;
     private boolean done;
+    private boolean delay;
 
     public SpecificInstruction(){};
     public SpecificInstruction(int instructionId, int beerId){
         this.instructionId = instructionId;
         this.beerId = beerId;
         this.done = false;
+        this.delay = false;
     }
 
     public int getSpecificId() {
@@ -50,5 +52,13 @@ public class SpecificInstruction {
 
     public void setDone(boolean done) {
         this.done = done;
+    }
+
+    public boolean isDelay() {
+        return delay;
+    }
+
+    public void setDelay(boolean delay) {
+        this.delay = delay;
     }
 }

@@ -58,7 +58,6 @@ public class Home {
         pane.setCenter(scrollPane);
         BorderPane.setAlignment(title, Pos.TOP_CENTER);
         pane.setPadding(new Insets(10,10,10,10)); // top, right, bottom, left
-        //pane.getStylesheets().add("GUI/styles.css");
 
         return pane;
     }

@@ -15,10 +15,8 @@ import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.control.*;
 import javafx.scene.control.cell.PropertyValueFactory;
-import javafx.scene.layout.BorderPane;
-import javafx.scene.layout.GridPane;
-import javafx.scene.layout.HBox;
-import javafx.scene.layout.VBox;
+import javafx.scene.input.MouseButton;
+import javafx.scene.layout.*;
 import javafx.scene.text.Font;
 import javafx.scene.text.FontWeight;
 
@@ -29,37 +27,50 @@ import java.util.ArrayList;
 public class ShowMaking {
     private final BorderPane pane = new BorderPane();
     private Beer selectedBeer;
-    private int instructionId;
+    private SpecificInstruction instruction = null;
     private final BeerRegister register = Controller.getRegister();
     private ObservableList<Instructions> tableWrapper;
     private boolean readyBoolean = false;
+    private int plusDays;
 
     public BorderPane getPane(Beer beer) {
         this.selectedBeer = beer;
         this.readyBoolean = register.ready(selectedBeer);
+        this.plusDays = selectedBeer.getPlusDays();
         Label title = new Label(beer.getName());
         title.setId("Title");
         TableView<Instructions> tableView = createTable();
+
+        Label delayLbl = new Label("Antall dager å utsette instruksjon");
+        TextField increaseField = new TextField("2");
+        increaseField.setPrefWidth(30);
+        Button increaseDelay = new Button("Endre antall dager");
+        increaseDelay.setOnAction(e -> {
+            if(Integer.parseInt(increaseField.getText()) > 10){
+                Dialog dialog = new Dialog("info", "Beklager", "Du får dessverre ikke utsette en instruksjon mer enn 10 dager");
+                dialog.display();
+            }else {
+                plusDays = Integer.parseInt(increaseField.getText());
+                updateTable();
+            }
+        } );
+
         TextArea notesArea = new TextArea();
         notesArea.setText(register.findBeer(selectedBeer).getNotes());
         notesArea.setEditable(true);Button updateNotes = new Button("Lagre notatendringer");
         updateNotes.setOnAction(e -> {
             selectedBeer.setNotes(notesArea.getText());
             register.editBeer(selectedBeer);
-            Alert alert = new Alert(Alert.AlertType.INFORMATION);
-            alert.setTitle("Info");
-            alert.setHeaderText("Endringer lagret");
-            String s ="Dine notatendringer er nå lagret";
-            alert.setContentText(s);
-            DialogPane alertPane = alert.getDialogPane();
-            alertPane.getStylesheets().add("GUI/styles.css");
-            alert.show();
+            Dialog dialog = new Dialog("info", "Endringer lagret", "Dine notatendringer er nå lagret");
+            dialog.display();
         });
         GridPane valuesPane = getValuesPane();
 
-
+        HBox delayBox = new HBox(5);
+        delayBox.getChildren().addAll(delayLbl, increaseField, increaseDelay);
+        delayBox.setAlignment(Pos.CENTER_LEFT);
         VBox centerBox = new VBox(10);
-        centerBox.getChildren().addAll(tableView, notesArea,updateNotes, valuesPane);
+        centerBox.getChildren().addAll(tableView, delayBox, notesArea,updateNotes, valuesPane);
         ScrollPane scrollPane = new ScrollPane(centerBox);
         scrollPane.setHbarPolicy(ScrollPane.ScrollBarPolicy.NEVER);
         scrollPane.setVbarPolicy(ScrollPane.ScrollBarPolicy.AS_NEEDED);
@@ -89,10 +100,11 @@ public class ShowMaking {
         Button changeVal1Btn = new Button("Endre FG1");
         Button changeVal2Btn = new Button("Endre FG2");
         Button changeVal3Btn = new Button("Registrer OG");
+        changeVal1Btn.setMaxWidth(Double.MAX_VALUE);
+        changeVal2Btn.setMaxWidth(Double.MAX_VALUE);
+        changeVal3Btn.setMaxWidth(Double.MAX_VALUE);
         Label ready = new Label(readyBoolean ? "Klar for tapping!":"-");
-        //ready.setFont(Font.font("Calibri", FontWeight.BOLD,15));
         ready.setId("Subtitle");
-        ready.setStyle(readyBoolean ? "-fx-text-fill: darkorange" : "");
 
         Label changeLabel = new Label("Ny starttid");
         TextField changeFieldDay = new TextField();
@@ -117,14 +129,14 @@ public class ShowMaking {
             register.editBeer(selectedBeer);
             obs1.setText(val1Input.getText());
             val1Input.clear();
-            updateValues(ready);
+            updateValues(ready, 1);
         });
         changeVal2Btn.setOnAction(e -> {
             selectedBeer.setValue2(Double.parseDouble(val2Input.getText()));
             register.editBeer(selectedBeer);
             obs2.setText(val2Input.getText());
             val2Input.clear();
-            updateValues(ready);
+            updateValues(ready, 2);
         });
 
         GridPane pane = new GridPane();
@@ -149,9 +161,14 @@ public class ShowMaking {
         return pane;
     }
 
-    private void updateValues(Label ready){
+    private void updateValues(Label ready, int val){
         this.readyBoolean = register.ready(selectedBeer);
         ready.setText(readyBoolean ? "Klar for tapping!":"-");
+        // If it is now ready, and the changed value was FG2 (second in a row), display a celebration
+        if(readyBoolean && val == 2) {
+            Dialog dialog = new Dialog("info", "WOHO!", "Din mekking er nå klar for tapping :)");
+            dialog.display();
+        }
     }
 
     private TableView<Instructions> createTable(){
@@ -159,36 +176,42 @@ public class ShowMaking {
         TableColumn<Instructions, String> descriptionColumn = new TableColumn<>("Hva");
         descriptionColumn.setCellValueFactory(new PropertyValueFactory<>("description"));
         TableColumn<Instructions, LocalDateTime> whenColumn = new TableColumn<>("Når");
-        whenColumn.setCellValueFactory(data -> new ReadOnlyObjectWrapper<>(selectedBeer.getStartTime().plusDays(data.getValue().getDaysAfterStart()).plusHours(data.getValue().getHours())));
+        whenColumn.setCellValueFactory(data -> new ReadOnlyObjectWrapper<>(register.findSpecificInstruction(data.getValue().getInstructionId(), selectedBeer.getId()).isDelay() ? selectedBeer.getStartTime().plusDays(data.getValue().getDaysAfterStart()).plusDays(plusDays).plusHours(data.getValue().getHours()):selectedBeer.getStartTime().plusDays(data.getValue().getDaysAfterStart()).plusHours(data.getValue().getHours())));
         //daysColumn.setStyle("-fx-alignment: center;");
         TableColumn<Instructions, String> doneColumn = new TableColumn<>("Gjort");
         doneColumn.setCellValueFactory(data -> new ReadOnlyStringWrapper(register.findSpecificInstruction(data.getValue().getInstructionId(), selectedBeer.getId()).isDone() ? "Ja":"Nei")); // Er noe som heter CheckBox. Kan nok være fint å bruke
         doneColumn.setStyle("-fx-alignment: center;");
         doneColumn.getStyleClass().add("center_aligned");
+        TableColumn<Instructions, String> delayColumn = new TableColumn<>("Utsatt");
+        delayColumn.setCellValueFactory(data -> new ReadOnlyStringWrapper(register.findSpecificInstruction(data.getValue().getInstructionId(), selectedBeer.getId()).isDelay() ? "Ja":"Nei"));
+        delayColumn.setStyle("-fx-alignment: center;");
+        delayColumn.getStyleClass().add("center_aligned");
 
         // Create the table instance
         TableView<Instructions> tableView = new TableView<>();
         tableView.setItems(getTableWrapper());
-        tableView.getColumns().addAll(descriptionColumn, whenColumn, doneColumn);
+        tableView.getColumns().addAll(descriptionColumn, whenColumn, doneColumn, delayColumn);
         tableView.setFixedCellSize(25);
         tableView.prefHeightProperty().bind(tableView.fixedCellSizeProperty().multiply(Bindings.size(tableView.getItems()).add(1.01)));
         tableView.setColumnResizePolicy( TableView.CONSTRAINED_RESIZE_POLICY );
         descriptionColumn.setMaxWidth( 1f * Integer.MAX_VALUE * 50 ); // 50% width
-        whenColumn.setMaxWidth( 1f * Integer.MAX_VALUE * 30 ); // 30% width
+        whenColumn.setMaxWidth( 1f * Integer.MAX_VALUE * 20 ); // 30% width
         doneColumn.setMaxWidth( 1f * Integer.MAX_VALUE * 20 ); // 20% width
+        delayColumn.setMaxWidth( 1f * Integer.MAX_VALUE * 10);
         tableView.setMinWidth(460);
 
         // Add listener for clicks on row
-        tableView.setOnMousePressed(mouseEvent -> {
-            if(mouseEvent.isPrimaryButtonDown()){
-                int selected = tableView.getSelectionModel().getSelectedItem().getInstructionId();
+        tableView.setOnMouseClicked(mouseEvent -> {
+            if(mouseEvent.getButton() == MouseButton.PRIMARY){
+                Instructions selected = tableView.getSelectionModel().getSelectedItem();
+                TablePosition pos = tableView.getSelectionModel().getSelectedCells().get(0);
+                TableColumn col = pos.getTableColumn();
 
                 if(mouseEvent.getClickCount() == 1){
-                    instructionId = selected;
-                }else if(mouseEvent.getClickCount() == 2){
-                    System.out.println("--> Gonna change done ");
-                    SpecificInstruction instruction = register.findSpecificInstruction(instructionId, selectedBeer.getId());
-                    instruction.setDone(!instruction.isDone());
+                    instruction = register.findSpecificInstruction(selected.getInstructionId(), selectedBeer.getId());
+                }else if(mouseEvent.getClickCount() == 2 && (col.equals(doneColumn) || col.equals(delayColumn))){ // TODO: fiks det at linjene mellom radene blir tjukkere for annethvert dobbeltklikk
+                    if(col.equals(doneColumn)) instruction.setDone(!instruction.isDone());
+                    else if(col.equals(delayColumn)) instruction.setDelay(!instruction.isDelay());
                     register.editSpecificInstruction(instruction);
                     updateTable();
                 }

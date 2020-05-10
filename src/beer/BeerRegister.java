@@ -42,9 +42,17 @@ public class BeerRegister implements Serializable {
         List<Beer> ongoingBeers = new ArrayList<>();
         for(Beer beer: allBeers){
             LocalDate now = LocalDateTime.now().toLocalDate();
-            if((now.isAfter(beer.getStartTime().toLocalDate()) || now.isEqual(beer.getStartTime().toLocalDate()))&& (now.isBefore(getLastDayOfMaking(beer).toLocalDate()) || now.isEqual(getLastDayOfMaking(beer).toLocalDate()))){
+            boolean finished = true; // Assumes that it is done until the opposite is proved
+            for(Instructions i: getInstructionsForBeer(beer.getName())){
+                if(!findSpecificInstruction(i.getInstructionId(), beer.getId()).isDone()){
+                    finished = false;
+                    break;
+                }
+            }
+            if((now.isAfter(beer.getStartTime().toLocalDate()) || now.isEqual(beer.getStartTime().toLocalDate())) && (now.isBefore(getLastDayOfMaking(beer).toLocalDate()) || now.isEqual(getLastDayOfMaking(beer).toLocalDate()))){
                 ongoingBeers.add(beer);
             }
+            if(now.isAfter(getLastDayOfMaking(beer).toLocalDate()) && !finished) ongoingBeers.add(beer);
         }
         return ongoingBeers;
     }
@@ -130,13 +138,21 @@ public class BeerRegister implements Serializable {
     }
 
     public List<Beer> getMakingsOfType(String beerName){
+        List<Beer> theList;
+        List<Beer> ongoing = getOngoingBeers();
+        List<Beer> coming = getComingBeers();
+        ArrayList<Integer> ids = new ArrayList<>();
+        for (Beer beer: ongoing) ids.add(beer.getId());
+        for (Beer beer: coming) ids.add(beer.getId());
         EntityManager em = getEM();
         try {
             Query q = em.createQuery("SELECT OBJECT(o) FROM Beer o WHERE o.name LIKE :name").setParameter("name", beerName);
-            return q.getResultList();
+            theList = q.getResultList();
+            theList.removeIf(beer -> ids.contains(beer.getId()));
         }finally {
             closeEM(em);
         }
+        return theList;
     }
 
     public String mostMadeBeer(){
@@ -174,8 +190,15 @@ public class BeerRegister implements Serializable {
         }
     }
 
-    public void editBeerInstruction(){
-        // Er fint mulig å faile, så burde ha en måte å endre det på
+    public void editBeerInstruction(Instructions instruction){
+        EntityManager em = getEM();
+        try {
+            em.getTransaction().begin();
+            em.merge(instruction);
+            em.getTransaction().commit();
+        }finally {
+            closeEM(em);
+        }
     }
 
     public Instructions getLastInstruction(String beerName){
@@ -219,17 +242,6 @@ public class BeerRegister implements Serializable {
                 nextInstruction = instruction;
             }
         }
-        /*
-        Instructions instruction = null;
-        EntityManager em = getEM();
-        try {
-            int id = nextInstruction.getInstructionId();
-            em.getTransaction().begin();
-            instruction = em.find(Instructions.class, id);
-            em.getTransaction().commit();
-        }finally {
-            closeEM(em);
-        }*/
 
         assert nextInstruction != null;
         return nextInstruction;

@@ -19,6 +19,7 @@ public class Beer implements Serializable {
     private double value2;
     private double OG;
     private LocalDateTime startTime;
+    private int plusDays;
     private String notes;
 
     public Beer(){} // Empty constructor
@@ -31,6 +32,7 @@ public class Beer implements Serializable {
         this.value2 = -1;
         this.OG = -1;
         this.startTime = startTime;
+        this.plusDays = 2;
         this.notes = "Notater";
     }
 
@@ -99,6 +101,10 @@ public class Beer implements Serializable {
         this.notes = notes;
     }
 
+    public int getPlusDays() { return plusDays; }
+
+    public void setPlusDays(int plusDays) { this.plusDays = plusDays;  }
+
     /*@OneToMany
     public List<beer.Instructions> getRecipe() {
         return recipe;
@@ -119,4 +125,5 @@ public class Beer implements Serializable {
                 ", startTime=" + startTime +
                 '}';
     }
+
 }

@@ -33,7 +33,7 @@ public class ShowRecipe {
         title1.setId("Subtitle");
         TableView<Instructions> tableView = createTable();
         Button changeInstructionBtn = new Button("Endre instruksjon"); // Knapp her for å endre på instruksjoner
-        Label title2 = new Label("Alle mekkinger av denne ølen");
+        Label title2 = new Label("Alle ferdige mekkinger av denne ølen");
         title2.setId("Subtitle");
         TableView<Beer> oldMakingsTable = createTableOldMakings();
         Label title3 = new Label("Notater");
@@ -45,14 +45,8 @@ public class ShowRecipe {
         updateNotes.setOnAction(e -> {
             String newNotes = notesArea.getText();
             register.editNotes(newNotes, beerName);
-            Alert alert = new Alert(Alert.AlertType.INFORMATION);
-            alert.setTitle("Info");
-            alert.setHeaderText("Endringer lagret");
-            String s ="Dine notatendringer er nå lagret";
-            alert.setContentText(s);
-            DialogPane alertPane = alert.getDialogPane();
-            alertPane.getStylesheets().add("GUI/styles.css");
-            alert.show();
+            Dialog dialog = new Dialog("info", "Endringer lagret", "Dine notatendringer er nå lagret");
+            dialog.display();
         });
 
         VBox centerBox = new VBox(10);
