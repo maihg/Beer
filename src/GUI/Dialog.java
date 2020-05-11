@@ -6,9 +6,9 @@ import javafx.scene.control.DialogPane;
 import java.util.logging.Logger;
 
 public class Dialog {
-    private String type;
-    private String title;
-    private String message;
+    private final String type;
+    private final String title;
+    private final String message;
 
     public Dialog(String type, String title, String message){
         this.type = type;
@@ -32,8 +32,7 @@ public class Dialog {
         Alert alert = new Alert(Alert.AlertType.INFORMATION);
         alert.setTitle("Info");
         alert.setHeaderText(title);
-        String s = message;
-        alert.setContentText(s);
+        alert.setContentText(message);
         DialogPane alertPane = alert.getDialogPane();
         alertPane.getStylesheets().add("GUI/styles.css");
         alert.show();

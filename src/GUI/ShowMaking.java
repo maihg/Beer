@@ -7,9 +7,7 @@ import beer.SpecificInstruction;
 import javafx.beans.binding.Bindings;
 import javafx.beans.property.ReadOnlyObjectWrapper;
 import javafx.beans.property.ReadOnlyStringWrapper;
-import javafx.beans.property.SimpleDoubleProperty;
 import javafx.collections.FXCollections;
-import javafx.collections.ObservableArray;
 import javafx.collections.ObservableList;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
@@ -17,12 +15,8 @@ import javafx.scene.control.*;
 import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.scene.input.MouseButton;
 import javafx.scene.layout.*;
-import javafx.scene.text.Font;
-import javafx.scene.text.FontWeight;
 
 import java.time.LocalDateTime;
-import java.time.format.DateTimeFormatter;
-import java.util.ArrayList;
 
 public class ShowMaking {
     private final BorderPane pane = new BorderPane();
@@ -54,6 +48,9 @@ public class ShowMaking {
                 updateTable();
             }
         } );
+
+        // TODO: lag en label for alkoholprosenten
+        // + bestem deg for når du skal regne ut den prosenten da
 
         TextArea notesArea = new TextArea();
         notesArea.setText(register.findBeer(selectedBeer).getNotes());
@@ -103,7 +100,8 @@ public class ShowMaking {
         changeVal1Btn.setMaxWidth(Double.MAX_VALUE);
         changeVal2Btn.setMaxWidth(Double.MAX_VALUE);
         changeVal3Btn.setMaxWidth(Double.MAX_VALUE);
-        Label ready = new Label(readyBoolean ? "Klar for tapping!":"-");
+        Label ready = new Label(" ");
+        updateValues(ready, 0);//new Label(readyBoolean ? "Klar for tapping!":"-");
         ready.setId("Subtitle");
 
         Label changeLabel = new Label("Ny starttid");
@@ -116,27 +114,36 @@ public class ShowMaking {
             LocalDateTime dateTime;
         };
         changeStartTime.setOnAction(e -> {
-            System.out.println(changeFieldDay.getText());
-            ref.dateTime = LocalDateTime.parse(changeFieldDay.getText());
-            selectedBeer.setStartTime(ref.dateTime);
-            register.editBeer(selectedBeer);
-            updateTable();
-            System.out.println("Fra beer-objekt i klassen: " + selectedBeer.getStartTime());
+            try {
+                ref.dateTime = LocalDateTime.parse(changeFieldDay.getText());
+                selectedBeer.setStartTime(ref.dateTime);
+                register.editBeer(selectedBeer);
+                updateTable();
+            }catch (Exception ex){
+                Dialog dialog = new Dialog("info", "Feil inndata",
+                        "Det skjedde en feil ved innføring av starttid. Det er viktig at du skriver det akkurat på formen " +
+                                "åååå-MM-ddThh:mm hvor åååå=årstall, MM=månedsnummer, dd=dag, T=bare skriv den, hh=time, mm=minutt");
+                dialog.display();
+            }
         });
 
         changeVal1Btn.setOnAction(e -> {
             selectedBeer.setValue1(Double.parseDouble(val1Input.getText()));
-            register.editBeer(selectedBeer);
             obs1.setText(val1Input.getText());
             val1Input.clear();
             updateValues(ready, 1);
         });
         changeVal2Btn.setOnAction(e -> {
             selectedBeer.setValue2(Double.parseDouble(val2Input.getText()));
-            register.editBeer(selectedBeer);
             obs2.setText(val2Input.getText());
             val2Input.clear();
             updateValues(ready, 2);
+        });
+        changeVal3Btn.setOnAction(e -> {
+            selectedBeer.setOG(Double.parseDouble(val3Input.getText()));
+            obs3.setText(val3Input.getText());
+            val3Input.clear();
+            updateValues(ready, 3);
         });
 
         GridPane pane = new GridPane();
@@ -162,12 +169,21 @@ public class ShowMaking {
     }
 
     private void updateValues(Label ready, int val){
-        this.readyBoolean = register.ready(selectedBeer);
-        ready.setText(readyBoolean ? "Klar for tapping!":"-");
-        // If it is now ready, and the changed value was FG2 (second in a row), display a celebration
-        if(readyBoolean && val == 2) {
-            Dialog dialog = new Dialog("info", "WOHO!", "Din mekking er nå klar for tapping :)");
-            dialog.display();
+        // Save new values to the database
+        register.editBeer(selectedBeer);
+
+        this.readyBoolean = register.ready(selectedBeer); // NB: Er egentlig bare her som readyBoolean blir brukt nå :/
+        // Check if it is now ready. If it is, and the changed value was FG2 (second in a row), display a celebration
+        if(readyBoolean && (val == 2 || val == 0)) {
+            // If the beer isn't ready, then readyBoolean is false and getABV will return -1
+            double abv = register.getABV(selectedBeer);
+            ready.setText("Klar for tapping! \nABV: " + String.format("%.2f", abv) + "%");
+            if(val == 2) {
+                Dialog dialog = new Dialog("info", "WOHO!", "Din mekking er nå klar for tapping :)");
+                dialog.display();
+            }
+        }else{
+            ready.setText("-");
         }
     }
 

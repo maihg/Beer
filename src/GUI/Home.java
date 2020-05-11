@@ -1,8 +1,9 @@
 package GUI;
 
-import GUI.Controller;
 import beer.Beer;
 import beer.BeerRegister;
+import beer.Instructions;
+import beer.SpecificInstruction;
 import javafx.application.Platform;
 import javafx.beans.binding.Bindings;
 import javafx.collections.FXCollections;
@@ -15,16 +16,17 @@ import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
-import javafx.scene.text.Font;
-import javafx.scene.text.FontWeight;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
+
+import java.time.LocalDateTime;
 
 
 public class Home {
     private final BorderPane pane = new BorderPane();
     private TableView<Beer> tableView;
     private String selectedBeerName;
+    private String selectedBeerType;
     private final BeerRegister register = Controller.getRegister();
     private ObservableList<Beer> homeTableWrapper;
 
@@ -85,7 +87,7 @@ public class Home {
 
         // Create the TableView instance
         tableView = new TableView<>();
-        tableView.setItems(FXCollections.observableArrayList(register.getAllBeerTypesProperty()));
+        tableView.setItems(getHomeTableWrapper());
         tableView.getColumns().addAll(beerNameColumn, beerTypeColumn, timesMadeColumn);
         tableView.setStyle("-fx-wrap-text: true");
         tableView.setFixedCellSize(25);
@@ -100,9 +102,11 @@ public class Home {
         tableView.setOnMousePressed(mouseEvent -> {
             if(mouseEvent.isPrimaryButtonDown()){
                 String beerName = tableView.getSelectionModel().getSelectedItem().getName();
+                String beerType = tableView.getSelectionModel().getSelectedItem().getType();
 
                 if(mouseEvent.getClickCount() == 1){
                     selectedBeerName = beerName;
+                    selectedBeerType = beerType;
                 }else if(mouseEvent.getClickCount() == 2){
                     System.out.println("--> Gonna show you the recipe for " + selectedBeerName);
                     Controller.goToShowRecipe(mouseEvent, selectedBeerName);
@@ -149,6 +153,53 @@ public class Home {
         startBox.setAlignment(Pos.CENTER);
         makeBox.setAlignment(Pos.CENTER);
         contents.setAlignment(Pos.CENTER);
+
+
+        var ref = new Object() {
+            LocalDateTime dateTime;
+        };
+        makeAgainBtn.setOnAction(e -> {
+            try {
+                ref.dateTime = LocalDateTime.parse(startTimeField.getText()); // Fort gjort å skrive inn feil, så har lagt dette inn i en try-catch
+
+                if(!(selectedBeerName == null)) {
+                    System.out.println(ref.dateTime);
+                    Beer beer = new Beer(selectedBeerName, selectedBeerType, ref.dateTime);
+                    register.addNewBeer(beer);
+                    System.out.println(beer.getId());
+                    for (Instructions instructions : register.getInstructionsForBeer(selectedBeerName)) {
+                        //register.addInstructionToBeer(instructions.getDescription(), instructions.getDaysAfterStart(), instructions.getHours(), instructions.getBeerName());
+                        register.addSpecificInstruction(new SpecificInstruction(instructions.getInstructionId(), beer.getId()));
+                    }
+                    updateHomeTable();
+                    stage.close();
+                }else{
+                    Dialog dialog = new Dialog("info", "Ingen øl er markert", "Du må markere en øl før du kan benytte deg av denne funksjonen");
+                    dialog.display();
+                }
+
+            }catch (Exception ex){
+                Dialog dialog = new Dialog("info", "Feil inndata",
+                        "Det skjedde en feil ved innføring av starttid. Det er viktig at du skriver det akkurat på formen " +
+                                "åååå-MM-ddThh:mm hvor åååå=årstall, MM=månedsnummer, dd=dag, T=bare skriv den, hh=time, mm=minutt");
+                dialog.display();
+            }
+        });
+
+        makeNewBtn.setOnAction(e -> {
+            try{
+                ref.dateTime = LocalDateTime.parse(startTimeField.getText()); // Fort gjort å skrive inn feil, så har lagt dette inn i en try-catch
+
+                // Kode kommer her
+
+            }catch (Exception ex){
+                Dialog dialog = new Dialog("info", "Feil inndata",
+                        "Det skjedde en feil ved innføring av starttid. Det er viktig at du skriver det akkurat på formen " +
+                                "åååå-MM-ddThh:mm hvor åååå=årstall, MM=månedsnummer, dd=dag, T=bare skriv den, hh=time, mm=minutt");
+                dialog.display();
+            }
+        });
+
 
         Scene scene = new Scene(contents, 300, 300);
         scene.getStylesheets().add("GUI/styles.css");

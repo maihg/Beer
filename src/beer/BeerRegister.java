@@ -41,18 +41,18 @@ public class BeerRegister implements Serializable {
         List<Beer> allBeers = getAllBeers();
         List<Beer> ongoingBeers = new ArrayList<>();
         for(Beer beer: allBeers){
-            LocalDate now = LocalDateTime.now().toLocalDate();
+            LocalDateTime now = LocalDateTime.now();
             boolean finished = true; // Assumes that it is done until the opposite is proved
             for(Instructions i: getInstructionsForBeer(beer.getName())){
-                if(!findSpecificInstruction(i.getInstructionId(), beer.getId()).isDone()){
+                if(!(findSpecificInstruction(i.getInstructionId(), beer.getId()).isDone())){
                     finished = false;
                     break;
                 }
             }
-            if((now.isAfter(beer.getStartTime().toLocalDate()) || now.isEqual(beer.getStartTime().toLocalDate())) && (now.isBefore(getLastDayOfMaking(beer).toLocalDate()) || now.isEqual(getLastDayOfMaking(beer).toLocalDate()))){
+            if((now.isAfter(beer.getStartTime()) || now.isEqual(beer.getStartTime())) && (now.isBefore(getLastDayOfMaking(beer)) || now.isEqual(getLastDayOfMaking(beer)))){
                 ongoingBeers.add(beer);
             }
-            if(now.isAfter(getLastDayOfMaking(beer).toLocalDate()) && !finished) ongoingBeers.add(beer);
+            if(now.isAfter(getLastDayOfMaking(beer)) && !finished) ongoingBeers.add(beer);
         }
         return ongoingBeers;
     }
@@ -319,21 +319,27 @@ public class BeerRegister implements Serializable {
         return instructions;
     }
 
-    public boolean regValues(Beer beer, double value, int day){
+    public boolean regValues(Beer beer, double value, int valType){ // TODO: decide whether or not to delete this method... only used in the BeerRegister.main()
         // Legg til verdi i beer-objektet dag 1 (value1) eller dag 2 (value2)
-        if(day == 1) beer.setValue1(value);
-        else if(day == 2) beer.setValue2(value);
+        if(valType == 1) beer.setValue1(value);
+        else if(valType == 2) beer.setValue2(value);
+        else if(valType == 3) beer.setOG(value);
         else throw new IllegalArgumentException("Day can only be 1 or 2");
         // Sjekk om det er klart for tapping
-        if(day == 1) return false; // Må sjekke to dager på rad, så dag en er den ikke klar
-        return ready(beer); // Evnt. ta inn beerId og ha bruk en findmetode for å finne riktig objekt
+        if(valType == 1) return false; // NB: Må sjekke to dager på rad, så dag en er den ikke klar
+        return ready(beer);        // Evnt. ta inn beerId og ha bruk en find metode for å finne riktig objekt
     }
 
+    // NB: FG og OG usually is in the interval [1.000, 1.160] and OG < FG
     public boolean ready(Beer beer){
         if(beer.getValue1() == -1 && beer.getValue2() == -1) return false;
-        return Math.abs(beer.getValue1() - beer.getValue2()) <= 0.1; // TODO: sjekk - verdi ok?
+        return Math.abs(beer.getValue1() - beer.getValue2()) <= 0.01; // TODO: sjekk - verdi ok?
     }
 
+    public double getABV(Beer beer) {
+        if(!ready(beer)) return -1;
+        return (beer.getValue2()-beer.getOG())*131.25;
+    }
     public Beer findBeer(Beer beer){
         EntityManager em = getEM();
         try{
@@ -343,7 +349,7 @@ public class BeerRegister implements Serializable {
         }
     }
 
-    // OBS - these three notes methods are connected to the Notes-class and are general for a type of beer (e.g. "Sommerøl")
+    // NB: These three notes methods are connected to the Notes-class and are general for a type of beer (e.g. "Sommerøl")
     public void addNotesToBeer(String beerName){
         EntityManager em = getEM();
         try {
@@ -413,16 +419,20 @@ public class BeerRegister implements Serializable {
 
             System.out.println("-- Antall mekkinger av Henriks beste: "+ register.noOfTimesMade("Henriks beste"));
 
-            boolean try1 = register.regValues(beer1, 0.3, 1);
-            boolean try2 = register.regValues(beer1, 0.19, 2);
-            boolean try3 = register.regValues(beer1, 0.25, 1);
-            boolean try4 = register.regValues(beer1, 0.24, 2);
+            boolean try1 = register.regValues(beer1, 1.16, 1);
+            boolean try2 = register.regValues(beer1, 1.19, 2);
+            boolean try3 = register.regValues(beer1, 1.15, 1);
+            boolean try4 = register.regValues(beer1, 1.14, 2);
             //System.out.println("1: " + try1 + ", 2: " + try2 + ", 3: "+ try3 +", 4: "+ try4);
 
             register.addInstructionToBeer("Start", 0, 0, "Henriks beste");
             register.addInstructionToBeer("Ha i humle", 0, 2, "Henriks beste");
             register.addInstructionToBeer("Tapp på flaske", 28, 0, "Henriks beste");
+            register.addInstructionToBeer("Start", 0, 0, "Sommerøl");
             register.addInstructionToBeer("Noe", 10,0, "Sommerøl");
+            register.addInstructionToBeer("Start", 0, 0, "BøffBay");
+            register.addInstructionToBeer("Start", 0,0, "Mai(s)maker");
+
             List<Instructions> recipe = register.getInstructionsForBeer("Henriks beste");
             System.out.println("-- RECIPE for Henriks beste");
             for(Instructions i: recipe) System.out.println(i.toString());
