@@ -24,6 +24,7 @@ public class ShowMaking {
     private SpecificInstruction instruction = null;
     private final BeerRegister register = Controller.getRegister();
     private ObservableList<Instructions> tableWrapper;
+    private Label ready;
     private boolean readyBoolean = false;
     private int plusDays;
 
@@ -48,9 +49,6 @@ public class ShowMaking {
                 updateTable();
             }
         } );
-
-        // TODO: lag en label for alkoholprosenten
-        // + bestem deg for når du skal regne ut den prosenten da
 
         TextArea notesArea = new TextArea();
         notesArea.setText(register.findBeer(selectedBeer).getNotes());
@@ -101,8 +99,8 @@ public class ShowMaking {
         changeVal1Btn.setMaxWidth(Double.MAX_VALUE);
         changeVal2Btn.setMaxWidth(Double.MAX_VALUE);
         changeVal3Btn.setMaxWidth(Double.MAX_VALUE);
-        Label ready = new Label(" ");
-        updateValues(ready, 0);//new Label(readyBoolean ? "Klar for tapping!":"-");
+        ready = new Label(" ");
+        updateValues(ready, 0);
         ready.setId("Subtitle");
 
         Label changeLabel = new Label("Ny starttid");
@@ -178,14 +176,20 @@ public class ShowMaking {
         // Save new values to the database
         register.editBeer(selectedBeer);
 
+        // Check if it is done or now ready
         this.readyBoolean = register.ready(selectedBeer); // NB: Er egentlig bare her som readyBoolean blir brukt nå :/
-        // Check if it is now ready. If it is, and the changed value was FG2 (second in a row), display a celebration
+        double abv = register.getABV(selectedBeer);
+        if(register.finished(selectedBeer)) {
+            ready.setText("ABV: " + String.format("%.2f", abv) + "%");
+            return;
+        }
+        // If it is not done but ready, and the changed value was FG2 (second in a row), display a celebration
+        // If val==0 no values has been changed and there's no need for celebrating
+        // If val==1 one have to wait a day, register FG2 and hope for a celebration
         if(readyBoolean && (val == 2 || val == 0)) {
-            // If the beer isn't ready, then readyBoolean is false and getABV will return -1
-            double abv = register.getABV(selectedBeer);
-            ready.setText("Klar for tapping! \nABV: " + String.format("%.2f", abv) + "%");
+            ready.setText("Klar for tapping!");
             if(val == 2) {
-                Dialog dialog = new Dialog("info", "WOHO!", "Din mekking er nå klar for tapping :)");
+                Dialog dialog = new Dialog("celebration", "Klar for tapping", "Verdiene er nå stabile og din mekking er klar for tapping :)");
                 dialog.display();
             }
         }else{
@@ -236,6 +240,7 @@ public class ShowMaking {
                     else if(col.equals(delayColumn)) instruction.setDelay(!instruction.isDelay());
                     register.editSpecificInstruction(instruction);
                     updateTable();
+                    updateValues(ready, 0);
                 }
             }
         });

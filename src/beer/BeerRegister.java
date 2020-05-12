@@ -23,20 +23,23 @@ import java.util.logging.Logger;
 public class BeerRegister implements Serializable {
     private EntityManagerFactory emf;
 
+    // CONSTRUCTOR - Initialize the EntitymanagerFactory
     public BeerRegister(EntityManagerFactory emf){
         this.emf = emf;
     }
 
+    // GET LISTS OF BEERS / GET BEER TYPE
     public List<Beer> getAllBeers() {
         EntityManager em = getEM();
         try {
-            Query q = em.createQuery("SELECT OBJECT(o) FROM Beer o");
+            Query q = em.createQuery("SELECT OBJECT(o) FROM Beer o ORDER BY o.name");
             return q.getResultList();
         }finally {
             closeEM(em);
         }
     }
 
+    // Lists all Beer-objects that are not done and where the start time has been
     public List<Beer> getOngoingBeers(){
         List<Beer> allBeers = getAllBeers();
         List<Beer> ongoingBeers = new ArrayList<>();
@@ -57,6 +60,7 @@ public class BeerRegister implements Serializable {
         return ongoingBeers;
     }
 
+    // Lists all the Beer-objects with a startTime in the future
     public List<Beer> getComingBeers(){
         List<Beer> allBeers = getAllBeers();
         List<Beer> comingBeers = new ArrayList<>();
@@ -69,6 +73,8 @@ public class BeerRegister implements Serializable {
         return comingBeers;
     }
 
+    // Q: Brukes bare i madeTheMost() her og den kunne egentlig brukt getAllBeerTypesProperty()...
+    //    Fjerne denne metoden og så endre navn på ..BeerTypesProperty til ..BeerTypes() ??
     public List<String> getAllBeerTypes(){
         List<Beer> allBeers = getAllBeers();
         List<String> beers = new ArrayList<>();
@@ -102,6 +108,26 @@ public class BeerRegister implements Serializable {
         return null;
     }
 
+    /**
+     * Get all makings (Beer-objects) with given name that are finished
+     * @param beerName name of the beer
+     * @return list of beers
+     */
+    public List<Beer> getMakingsOfType(String beerName){
+        List<Beer> theList;
+        EntityManager em = getEM();
+        try {
+            Query q = em.createQuery("SELECT OBJECT(o) FROM Beer o WHERE o.name LIKE :name").setParameter("name", beerName);
+            theList = q.getResultList();
+            theList.removeIf(beer -> !finished(beer));
+        }finally {
+            closeEM(em);
+        }
+        return theList;
+    }
+
+
+    // METHODS FOR USE ON BEER-OBJECTS
     public boolean addNewBeer(Beer beer){
         EntityManager em = getEM();
         try {
@@ -128,6 +154,55 @@ public class BeerRegister implements Serializable {
         }
     }
 
+    // TODO: decide whether or not to delete this method... only used in the BeerRegister.main()
+    public boolean regValues(Beer beer, double value, int valType){
+        // Legg til verdi i beer-objektet dag 1 (value1) eller dag 2 (value2)
+        if(valType == 1) beer.setValue1(value);
+        else if(valType == 2) beer.setValue2(value);
+        else if(valType == 3) beer.setOG(value);
+        else throw new IllegalArgumentException("Day can only be 1 or 2");
+        // Sjekk om det er klart for tapping
+        if(valType == 1) return false; // NB: Må sjekke to dager på rad, så dag en er den ikke klar
+        return ready(beer);        // Evnt. ta inn beerId og ha bruk en find metode for å finne riktig objekt
+    }
+
+    // NB: FG og OG usually is in the interval [1.000, 1.160] and OG < FG
+    public boolean ready(Beer beer){
+        if(beer.getValue1() == -1 && beer.getValue2() == -1) return false;
+        return Math.abs(beer.getValue1() - beer.getValue2()) <= 0.01; // TODO: sjekk - verdi ok?
+    }
+
+    // NB: finished = all instructions are marked as done
+    public boolean finished(Beer beer){
+        List<Instructions> instructionsList = getInstructionsForBeer(beer.getName());
+        // Loop through the instructions to see if one or more instructions are not done
+        for(Instructions instructions: instructionsList){
+            if(!findSpecificInstruction(instructions.getInstructionId(), beer.getId()).isDone()) return false;
+        }
+        return true;
+    }
+
+    /**
+     * Calculates the alcohol by volume
+     * @param beer Beer-object
+     * @return the percent as double
+     */
+    public double getABV(Beer beer) {
+        if(!ready(beer)) return -1;
+        return (beer.getValue2()-beer.getOG())*131.25;
+    }
+
+    public Beer findBeer(Beer beer){
+        EntityManager em = getEM();
+        try{
+            return em.find(Beer.class, beer.getId());
+        }finally {
+            closeEM(em);
+        }
+    }
+
+
+    // DIV STUFF
     private int noOfTimesMade(String name){
         EntityManager em = getEM();
         Long ans;
@@ -147,24 +222,6 @@ public class BeerRegister implements Serializable {
         return no;
     }
 
-    public List<Beer> getMakingsOfType(String beerName){
-        List<Beer> theList;
-        List<Beer> ongoing = getOngoingBeers();
-        List<Beer> coming = getComingBeers();
-        ArrayList<Integer> ids = new ArrayList<>();
-        for (Beer beer: ongoing) ids.add(beer.getId());
-        for (Beer beer: coming) ids.add(beer.getId());
-        EntityManager em = getEM();
-        try {
-            Query q = em.createQuery("SELECT OBJECT(o) FROM Beer o WHERE o.name LIKE :name").setParameter("name", beerName);
-            theList = q.getResultList();
-            theList.removeIf(beer -> ids.contains(beer.getId()));
-        }finally {
-            closeEM(em);
-        }
-        return theList;
-    }
-
     public String mostMadeBeer(){
         List<String> beers = getAllBeerTypes();
         String theMost = "-";
@@ -182,6 +239,9 @@ public class BeerRegister implements Serializable {
         return theMost;
     }
 
+
+
+    // METHODS - INSTRUCTIONS
     /*
     Akkurat nå er planen at man ikke har en direkte linje mellom beer.Beer og beer.Instructions.
     Man henter riktige instructions ved å velge navnet på ølen.
@@ -200,6 +260,7 @@ public class BeerRegister implements Serializable {
         }
     }
 
+    // Q: Beholde eller forkaste denne metoden? Brukes ikke og er lite stress å skrive på nytt
     public void editBeerInstruction(Instructions instruction){
         EntityManager em = getEM();
         try {
@@ -211,33 +272,7 @@ public class BeerRegister implements Serializable {
         }
     }
 
-    public Instructions getLastInstruction(String beerName){
-        List<Instructions> instructions = getInstructionsForBeer(beerName);
-        Instructions instr = null;
-        int days = 0;
-        for(Instructions i: instructions){
-            if(i.getDaysAfterStart() > days){
-                days = i.getDaysAfterStart();
-                instr = i;
-            }
-        }
-        return instr;
-    }
-    public LocalDateTime getLastDayOfMaking(Beer beer){
-        if(findBeer(beer) == null) throw new IllegalArgumentException("Couldn't find beer"); // TODO: sjekk om det er mulig å bruke metoden med et ikke eksisterende objekt
-
-        List<Instructions> instructions = getInstructionsForBeer(beer.getName());
-        int days = 0;
-        for(Instructions i: instructions){
-            if(i.getDaysAfterStart() > days){
-                days = i.getDaysAfterStart();
-            }
-        }
-        return beer.getStartTime().plusDays(days);
-    }
-
     public Instructions getNextInstruction(Beer beer){
-
         List<Instructions> instructions = this.getInstructionsForBeer(beer.getName());
         LocalDateTime now = LocalDateTime.now();
         LocalDateTime next = null;
@@ -266,21 +301,50 @@ public class BeerRegister implements Serializable {
         Instructions instruction = getNextInstruction(beer);
         return beer.getStartTime().plusDays(instruction.getDaysAfterStart());
     }
+    public Instructions getLastInstruction(String beerName){
+        List<Instructions> instructions = getInstructionsForBeer(beerName);
+        Instructions instr = null;
+        int days = 0;
+        for(Instructions i: instructions){
+            if(i.getDaysAfterStart() > days){
+                days = i.getDaysAfterStart();
+                instr = i;
+            }
+        }
+        return instr;
+    }
+    public LocalDateTime getLastDayOfMaking(Beer beer){
+        if(findBeer(beer) == null) throw new IllegalArgumentException("Couldn't find beer"); // TODO: sjekk om det er mulig å bruke metoden med et ikke eksisterende objekt
+
+        List<Instructions> instructions = getInstructionsForBeer(beer.getName());
+        int days = 0;
+        for(Instructions i: instructions){
+            if(i.getDaysAfterStart() > days){
+                days = i.getDaysAfterStart();
+            }
+        }
+        return beer.getStartTime().plusDays(days);
+    }
 
     public List<Instructions> getInstructionsForBeer(String beerName){
         EntityManager em = getEM();
         List<Instructions> instructions = null;
         try {
             em.getTransaction().begin();
-            Query q = em.createQuery("SELECT OBJECT(o) FROM Instructions o WHERE o.beerName LIKE :name").setParameter("name", beerName);
+            Query q = em.createQuery("SELECT OBJECT(o) FROM Instructions o WHERE o.beerName LIKE :name ORDER BY o.daysAfterStart+o.hours").setParameter("name", beerName);
+            // NB: ^er litt usikker på den order by delen, men tror den skal være grei altså (sånn hvis ting blir lagt inn i tilfeldig rekkefølge)
             instructions = q.getResultList();
             em.getTransaction().commit();
         }finally {
             closeEM(em);
         }
-        return instructions; // TODO: make sure this list is sorted so that the first steps actually comes first in the table view
+        return instructions;
+        // TODO: make sure this list is sorted so that the first steps actually comes first in the table view
+        // Q: Har vi fått til dette nå som det er order by o.daysAfterStart+o.hours?
     }
 
+
+    // METHODS - SPECIFIC_INSTRUCTION
     public void addSpecificInstruction(SpecificInstruction specificInstruction){
         EntityManager em = getEM();
         try {
@@ -329,36 +393,8 @@ public class BeerRegister implements Serializable {
         return instructions;
     }
 
-    public boolean regValues(Beer beer, double value, int valType){ // TODO: decide whether or not to delete this method... only used in the BeerRegister.main()
-        // Legg til verdi i beer-objektet dag 1 (value1) eller dag 2 (value2)
-        if(valType == 1) beer.setValue1(value);
-        else if(valType == 2) beer.setValue2(value);
-        else if(valType == 3) beer.setOG(value);
-        else throw new IllegalArgumentException("Day can only be 1 or 2");
-        // Sjekk om det er klart for tapping
-        if(valType == 1) return false; // NB: Må sjekke to dager på rad, så dag en er den ikke klar
-        return ready(beer);        // Evnt. ta inn beerId og ha bruk en find metode for å finne riktig objekt
-    }
 
-    // NB: FG og OG usually is in the interval [1.000, 1.160] and OG < FG
-    public boolean ready(Beer beer){
-        if(beer.getValue1() == -1 && beer.getValue2() == -1) return false;
-        return Math.abs(beer.getValue1() - beer.getValue2()) <= 0.01; // TODO: sjekk - verdi ok?
-    }
-
-    public double getABV(Beer beer) {
-        if(!ready(beer)) return -1;
-        return (beer.getValue2()-beer.getOG())*131.25;
-    }
-    public Beer findBeer(Beer beer){
-        EntityManager em = getEM();
-        try{
-            return em.find(Beer.class, beer.getId());
-        }finally {
-            closeEM(em);
-        }
-    }
-
+    // METHODS FOR NOTES - NOTES-CLASS
     // NB: These three notes methods are connected to the Notes-class and are general for a type of beer (e.g. "Sommerøl")
     public void addNotesToBeer(String beerName){
         EntityManager em = getEM();
@@ -396,6 +432,7 @@ public class BeerRegister implements Serializable {
     }
 
 
+    // METHODS CONCERNING THE ENTITY MANANGER FACTORY
     private EntityManager getEM(){
         return emf.createEntityManager();
     }
@@ -404,6 +441,7 @@ public class BeerRegister implements Serializable {
     }
 
 
+    // MAIN - For the testing of different methods and creating some content to the DB
     public static void main(String[] args) {
         EntityManagerFactory emf = null;
         try {

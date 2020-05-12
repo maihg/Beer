@@ -25,6 +25,21 @@ public class NewBeer {
         contents.setPadding(new Insets(10, 0, 10, 0)); // Get some space between the title and the contents
         // TODO: add contents to a scrollPane
 
+        // TODO: planen
+        //  - opprett Beer-Object med tom konstruktør, eller sånn her new Beer("temp%20Name", "temp%20type", startTime);
+        //  - opprett Instructions-objekter og bruk navn="temp%20Name"
+        //  - legg Instructions-objektene i en List i bakgrunnen (som så brukes til å fylle en tabell)
+        //  - la folk legge til og endre på Instructions-objektene, samt fjerne objekter fra lista i bakrunnen (marker øl i lista før endre og slett)
+        //  - når folk trykker på "Klar, ferdig, mekk!"
+        //      * sjekk om navnet er ledig og ok (foreslå <ønsket_navn>#<tall>, <ønsket_navn>_v2.0 eller et helt nytt forsøk)
+        //          - if(getAllBeerTypes().contains(<ønsket_navn>) dialog.display();
+        //      * beerObj.setName(nameField.getText())
+        //      * beerObj.setType(typeField.getText())
+        //      * register.addNewBeer(beerObj)
+        //      * instructionsList.foreach(instr -> register.addInstructionToBeer(instr.getDescription(), instr.getDaysAfterStart(), instr.getHours(), beerObj.getName()))
+        //      * add specific instructions (see Home --> makeAgainBtn.setOnAction())
+        //      * goToShowMaking(event, beerObj) [event fra trykket på knappen]
+
         pane.setTop(title);
         pane.setCenter(contents);
         BorderPane.setAlignment(title, Pos.TOP_CENTER);
