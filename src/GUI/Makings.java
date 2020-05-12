@@ -67,7 +67,7 @@ public class Makings {
         }
         tableView.getColumns().addAll(descriptionColumn, daysColumn, hoursColumn);
         tableView.setFixedCellSize(25);
-        tableView.prefHeightProperty().bind(tableView.fixedCellSizeProperty().multiply(Bindings.size(tableView.getItems()).add(1.01)));
+        tableView.prefHeightProperty().bind(tableView.fixedCellSizeProperty().multiply(Bindings.size(tableView.getItems()).add(1.10)));
         tableView.setColumnResizePolicy( TableView.CONSTRAINED_RESIZE_POLICY );
         descriptionColumn.setMaxWidth( 1f * Integer.MAX_VALUE * 50 ); // 50% width
         daysColumn.setMaxWidth( 1f * Integer.MAX_VALUE * 30 ); // 30% width

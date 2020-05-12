@@ -2,6 +2,7 @@ package GUI;
 
 import beer.*;
 import javafx.beans.binding.Bindings;
+import javafx.beans.property.ReadOnlyStringWrapper;
 import javafx.collections.FXCollections;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
@@ -21,9 +22,10 @@ public class ShowRecipe {
 
     public BorderPane getPane(String beerName) {
         this.beerName = beerName;
-        Notes notes = register.findNotes(beerName);
         Label title = new Label(beerName);
         title.setId("Title");
+        String beerType = register.getBeerType(beerName);
+        Label type = new Label("Type øl: " + beerType);
         Label title1 = new Label("Instruksjoner");
         title1.setId("Subtitle");
         TableView<Instructions> tableView = createTable();
@@ -33,6 +35,7 @@ public class ShowRecipe {
         TableView<Beer> oldMakingsTable = createTableOldMakings();
         Label title3 = new Label("Notater");
         title3.setId("Subtitle");
+        Notes notes = register.findNotes(beerName);
         TextArea notesArea = new TextArea(notes.getNotes());
         notesArea.setEditable(true);
         // Vil at området bare skal gjøre seg større istedenfor å få en scrollbar
@@ -45,7 +48,7 @@ public class ShowRecipe {
         });
 
         VBox centerBox = new VBox(10);
-        centerBox.getChildren().addAll(title1, tableView, changeInstructionBtn, title2, oldMakingsTable, title3, notesArea, updateNotes);
+        centerBox.getChildren().addAll(type, title1, tableView, changeInstructionBtn, title2, oldMakingsTable, title3, notesArea, updateNotes);
         ScrollPane scrollPane = new ScrollPane(centerBox);
         scrollPane.setHbarPolicy(ScrollPane.ScrollBarPolicy.NEVER);
         scrollPane.setVbarPolicy(ScrollPane.ScrollBarPolicy.ALWAYS);
@@ -77,7 +80,7 @@ public class ShowRecipe {
         tableView.setItems(FXCollections.observableArrayList(register.getInstructionsForBeer(beerName)));
         tableView.getColumns().addAll(descriptionColumn, daysColumn, hoursColumn);
         tableView.setFixedCellSize(25);
-        tableView.prefHeightProperty().bind(tableView.fixedCellSizeProperty().multiply(Bindings.size(tableView.getItems()).add(1.01)));
+        tableView.prefHeightProperty().bind(tableView.fixedCellSizeProperty().multiply(Bindings.size(tableView.getItems()).add(1.10)));
         tableView.setColumnResizePolicy( TableView.CONSTRAINED_RESIZE_POLICY );
         descriptionColumn.setMaxWidth( 1f * Integer.MAX_VALUE * 50 ); // 50% width
         daysColumn.setMaxWidth( 1f * Integer.MAX_VALUE * 30 ); // 30% width
@@ -92,16 +95,19 @@ public class ShowRecipe {
         nameColumn.setCellValueFactory(new PropertyValueFactory<>("name"));
         TableColumn<Beer, LocalDateTime> startColumn = new TableColumn<>("Starttid");
         startColumn.setCellValueFactory(new PropertyValueFactory<>("startTime"));
+        TableColumn<Beer, String> abvColumn = new TableColumn<>("ABV (%)");
+        abvColumn.setCellValueFactory(data -> new ReadOnlyStringWrapper(String.format("%.2f", register.getABV(data.getValue()))));
 
         // Create the table instance
         TableView<Beer> tableView = new TableView<>();
         tableView.setItems(FXCollections.observableArrayList(register.getMakingsOfType(beerName)));
-        tableView.getColumns().addAll(nameColumn, startColumn);
+        tableView.getColumns().addAll(nameColumn, startColumn, abvColumn);
         tableView.setFixedCellSize(25);
-        tableView.prefHeightProperty().bind(tableView.fixedCellSizeProperty().multiply(Bindings.size(tableView.getItems()).add(1.01)));
+        tableView.prefHeightProperty().bind(tableView.fixedCellSizeProperty().multiply(Bindings.size(tableView.getItems()).add(1.10)));
         tableView.setColumnResizePolicy( TableView.CONSTRAINED_RESIZE_POLICY );
         nameColumn.setMaxWidth( 1f * Integer.MAX_VALUE * 50 ); // 50% width
-        startColumn.setMaxWidth( 1f * Integer.MAX_VALUE * 50 ); // 50% width
+        startColumn.setMaxWidth( 1f * Integer.MAX_VALUE * 30 ); // 50% width
+        abvColumn.setMaxWidth( 1f * Integer.MAX_VALUE * 20);
 
         // Add listener for clicks on row
         tableView.setOnMousePressed(mouseEvent -> {

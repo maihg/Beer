@@ -2,15 +2,11 @@ package GUI;
 
 import beer.*;
 import javafx.application.Application;
-import javafx.collections.FXCollections;
-import javafx.collections.ObservableList;
 import javafx.event.ActionEvent;
 import javafx.event.Event;
 import javafx.geometry.Pos;
 import javafx.scene.Scene;
 import javafx.scene.control.*;
-import javafx.scene.control.cell.PropertyValueFactory;
-import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.Priority;
 import javafx.scene.layout.Region;
@@ -19,6 +15,7 @@ import javafx.stage.Stage;
 
 import javax.persistence.EntityManagerFactory;
 import javax.persistence.Persistence;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 
 
@@ -30,22 +27,14 @@ public class Controller extends Application {
     private static Makings makings;
     private static ShowRecipe showRecipe;
     private static ShowMaking showMaking;
+    private static NewBeer newBeer;
     private static VBox contents;
 
     private static String lastScene = "home";
     private static String newScene = "home";
-    private static ArrayList<String> sceneHistory = new ArrayList<>();
+    private static final ArrayList<String> sceneHistory = new ArrayList<>(); // Q: Hvorfor kan denne være final?
     private static String selectedBeerName;
     private static Beer selectedBeer;
-    private static Beer selectedBeerOld;
-
-
-    // The JavaFX ObservableListWrapper used to connect tot he underlying AddressBook
-    private ObservableList<Beer> homeTableWrapper;
-
-    // Need to keep track of the TableView-instance since we need to access it
-    // from different places in our GUI (menu, doubleclicking, toolbar etc.)
-    private TableView<Beer> homeTable;
 
 
     @Override
@@ -58,6 +47,7 @@ public class Controller extends Application {
         makings = new Makings();
         showRecipe = new ShowRecipe();
         showMaking = new ShowMaking();
+        newBeer = new NewBeer();
         sceneHistory.add("home");
 
         Button homeBtn = new Button("Hjem");
@@ -94,7 +84,6 @@ public class Controller extends Application {
 
     public static void goToShowMaking(Event event, Beer beer){
         stage.setTitle("MH -- Se spesifikk mekking");
-        selectedBeerOld = selectedBeer;
         selectedBeer = beer;
         contents.getChildren().set(1, showMaking.getPane(beer));
         changeNewScene("showMaking");
@@ -105,6 +94,12 @@ public class Controller extends Application {
         selectedBeerName = beerName;
         contents.getChildren().set(1, showRecipe.getPane(beerName));
         changeNewScene("showRecipe");
+    }
+
+    public static void goToNewBeer(Event event, LocalDateTime startTime){
+        stage.setTitle("MH -- Lag ny type mekk");
+        contents.getChildren().set(1, newBeer.getPane(startTime));
+        changeNewScene("newBeer");
     }
 
     public static void changeNewScene(String theNewScene){
@@ -147,8 +142,11 @@ public class Controller extends Application {
             case "showRecipe":
                 goToShowRecipe(event, selectedBeerName);
                 break;
+            case "newBeer":
+                // Should not be able to go back to the newBeer-scene
             case "stay":
                 // User is at home page and there is no need for switching view
+                System.out.println("staying");
                 break;
             default:
                 System.out.println("Couldn't find a last scene to go to");

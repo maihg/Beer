@@ -91,7 +91,7 @@ public class Home {
         tableView.getColumns().addAll(beerNameColumn, beerTypeColumn, timesMadeColumn);
         tableView.setStyle("-fx-wrap-text: true");
         tableView.setFixedCellSize(25);
-        tableView.prefHeightProperty().bind(tableView.fixedCellSizeProperty().multiply(Bindings.size(tableView.getItems()).add(1.01)));
+        tableView.prefHeightProperty().bind(tableView.fixedCellSizeProperty().multiply(Bindings.size(tableView.getItems()).add(1.10)));
         tableView.setColumnResizePolicy( TableView.CONSTRAINED_RESIZE_POLICY );
         beerNameColumn.setMaxWidth( 1f * Integer.MAX_VALUE * 50 ); // 50% width
         beerTypeColumn.setMaxWidth( 1f * Integer.MAX_VALUE * 30 ); // 30% width
@@ -123,10 +123,11 @@ public class Home {
         return homeTableWrapper;
     }
 
-    public void updateHomeTable(){ // TODO: use this when adding and editing a type of beer
+    public void updateHomeTable(){
         this.homeTableWrapper.setAll(register.getAllBeerTypesProperty());
     }
 
+    // Q: Er det riktig å ha en såå gedigen metode inne i denne klassen? Begynner å bli litt uoversiktelig...
     private void showNewMakingWindow(){
         Stage stage = new Stage();
 
@@ -161,6 +162,7 @@ public class Home {
         makeAgainBtn.setOnAction(e -> {
             try {
                 ref.dateTime = LocalDateTime.parse(startTimeField.getText()); // Fort gjort å skrive inn feil, så har lagt dette inn i en try-catch
+                if(ref.dateTime.getYear() > 2050) throw new IllegalArgumentException();
 
                 if(!(selectedBeerName == null)) {
                     System.out.println(ref.dateTime);
@@ -178,6 +180,9 @@ public class Home {
                     dialog.display();
                 }
 
+            }catch (IllegalArgumentException illEx){
+                Dialog dialog = new Dialog("info", "For langt frem i tid", "Du har skrevet inn en dato som er for langt frem i tid");
+                dialog.display();
             }catch (Exception ex){
                 Dialog dialog = new Dialog("info", "Feil inndata",
                         "Det skjedde en feil ved innføring av starttid. Det er viktig at du skriver det akkurat på formen " +
@@ -189,9 +194,14 @@ public class Home {
         makeNewBtn.setOnAction(e -> {
             try{
                 ref.dateTime = LocalDateTime.parse(startTimeField.getText()); // Fort gjort å skrive inn feil, så har lagt dette inn i en try-catch
+                if(ref.dateTime.getYear() > 2050) throw new IllegalArgumentException();
+                Controller.goToNewBeer(e, ref.dateTime);
+                // TODO: double check that we don't need updateTable() here
+                stage.close();
 
-                // Kode kommer her
-
+            }catch (IllegalArgumentException illEx){
+                Dialog dialog = new Dialog("info", "For langt frem i tid", "Du har skrevet inn en dato som er for langt frem i tid");
+                dialog.display();
             }catch (Exception ex){
                 Dialog dialog = new Dialog("info", "Feil inndata",
                         "Det skjedde en feil ved innføring av starttid. Det er viktig at du skriver det akkurat på formen " +

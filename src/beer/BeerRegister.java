@@ -91,6 +91,16 @@ public class BeerRegister implements Serializable {
         }
         return list;
     }
+    public String getBeerType(String beerName){
+
+        List<Beer> types = getAllBeers();
+        for(Beer beer: types){
+            if(!(types.size() == 0)){
+                if(beer.getName().equals(beerName)) return beer.getType();
+            }
+        }
+        return null;
+    }
 
     public boolean addNewBeer(Beer beer){
         EntityManager em = getEM();

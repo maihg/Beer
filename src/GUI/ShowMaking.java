@@ -73,6 +73,7 @@ public class ShowMaking {
         scrollPane.setVbarPolicy(ScrollPane.ScrollBarPolicy.AS_NEEDED);
         scrollPane.setFitToWidth(true);
         pane.setTop(title);
+        BorderPane.setAlignment(title, Pos.TOP_CENTER);
         pane.setCenter(scrollPane);
         pane.setPadding(new Insets(10,10,10,10));
 
@@ -110,15 +111,20 @@ public class ShowMaking {
         Button changeStartTime = new Button("Endre starttid");
 
         //DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd hh:mm");
+        // Q: Legge til noe formattering på dato? Hvor vanskelig ville det vært å få til det over alt?
         var ref = new Object() {
             LocalDateTime dateTime;
         };
         changeStartTime.setOnAction(e -> {
             try {
                 ref.dateTime = LocalDateTime.parse(changeFieldDay.getText());
+                if(ref.dateTime.getYear() > 2050) throw new IllegalArgumentException();
                 selectedBeer.setStartTime(ref.dateTime);
                 register.editBeer(selectedBeer);
                 updateTable();
+            }catch (IllegalArgumentException illEx){
+                Dialog dialog = new Dialog("info", "For langt frem i tid", "Du har skrevet inn en dato som er for langt frem i tid");
+                dialog.display();
             }catch (Exception ex){
                 Dialog dialog = new Dialog("info", "Feil inndata",
                         "Det skjedde en feil ved innføring av starttid. Det er viktig at du skriver det akkurat på formen " +
@@ -208,7 +214,7 @@ public class ShowMaking {
         tableView.setItems(getTableWrapper());
         tableView.getColumns().addAll(descriptionColumn, whenColumn, doneColumn, delayColumn);
         tableView.setFixedCellSize(25);
-        tableView.prefHeightProperty().bind(tableView.fixedCellSizeProperty().multiply(Bindings.size(tableView.getItems()).add(1.01)));
+        tableView.prefHeightProperty().bind(tableView.fixedCellSizeProperty().multiply(Bindings.size(tableView.getItems()).add(1.10)));
         tableView.setColumnResizePolicy( TableView.CONSTRAINED_RESIZE_POLICY );
         descriptionColumn.setMaxWidth( 1f * Integer.MAX_VALUE * 50 ); // 50% width
         whenColumn.setMaxWidth( 1f * Integer.MAX_VALUE * 20 ); // 30% width
