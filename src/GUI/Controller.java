@@ -51,7 +51,10 @@ public class Controller extends Application {
         sceneHistory.add("home");
 
         Button homeBtn = new Button("Hjem");
-        homeBtn.setOnAction(Controller::goToHome);
+        homeBtn.setOnAction(e -> {
+            if(!checkConfirmation()) return;
+            goToHome(e);
+        }); //Q: Hvorfor dirr dirr når "lag ny type mekk"??? Noe i denne klassen sin skyld?
         Button goBackBtn = new Button("<-- Tilbake");
         goBackBtn.setOnAction(Controller::goBack);
         VBox topV = new VBox(homeBtn, goBackBtn);
@@ -126,6 +129,7 @@ public class Controller extends Application {
     }
 
     public static void goBack(Event event){
+        if(!checkConfirmation()) return;
         if(sceneHistory.size()==1) return; // One element = only "home" in list
 
         sceneHistory.remove(sceneHistory.size() - 1);
@@ -155,6 +159,14 @@ public class Controller extends Application {
 
     }
 
+    private static boolean checkConfirmation(){
+        if(newScene.equals("newBeer")){
+            Dialog dialog = new Dialog("confirm", "Obs!", "Hvis du går ut nå vil du miste det du har gjort. Gå ut alikevel?");
+            dialog.display();
+            return dialog.isYesNo();
+        }
+        return true;
+    }
     public static String getSelectedBeerName(){ return selectedBeerName; }
 
     public static BeerRegister getRegister() {

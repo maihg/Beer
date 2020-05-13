@@ -143,6 +143,13 @@ public class BeerRegister implements Serializable {
         return true;
     }
 
+    public boolean okName(String beerName){
+        for(Beer beer: getAllBeerTypesProperty()){
+            if(beer.getName().equalsIgnoreCase(beerName)) return false;
+        }
+        return true;
+    }
+
     public void editBeer(Beer beer){
         EntityManager em = getEM();
         try {

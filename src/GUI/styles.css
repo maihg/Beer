@@ -28,6 +28,12 @@ CSS -- STYLING OF THE APPLICATION
     -fx-text-fill: inherit;
     -fx-fit-to-width: true;
 }
+.scroll-pane .scroll-bar{
+    -fx-background-color: #787673;
+}
+.scroll-pane .scroll-bar .thumb{
+    -fx-background-color: #3d3d3d;
+}
 .scroll-pane:focused {
     -fx-background-insets: 0;
 }
@@ -58,8 +64,6 @@ CSS -- STYLING OF THE APPLICATION
     -fx-text-fill: #ffffff;
     -fx-selection-bar: transparent; /* Endrer fargen på sidekanten når du har valgt en rad*/
     -fx-font-size: 13;
-    /*-fx-hbar-policy: never;*/
-    -fx-wrap-text: true;
 }
 .table-view .column-header {
     -fx-background-color: #787673;
@@ -75,20 +79,33 @@ CSS -- STYLING OF THE APPLICATION
     -fx-border-color: transparent transparent #787673 transparent;
 }
 .table-view .table-cell:selected, .table-row-cell:selected { -fx-border-width: 0; }
-.table-row-cell{ -fx-background-color: #3d3d3d; }
+.table-row-cell{
+    -fx-background-color: #3d3d3d;
+    -fx-border-width: 0;
+}
+.table-row-cell:empty{ -fx-background-color: transparent; }
 /*.table-row-cell:odd{ -fx-background-color: derive(#3d3d3d, 80%); } Hvis man vil ha en annen farge på annenhver rad */
 .table-view:focused .table-row-cell:filled:focused:selected {
     -fx-background-color: #f29316;
 }
-.table-view .scroll-bar * { /* To hide the scroll bars in the table view */
+.table-view .scroll-bar * {
+    /* !* To hide the scroll bars in the table view *!
     -fx-min-width: 0;
     -fx-pref-width: 0;
     -fx-max-width: 0;
 
     -fx-min-height: 0;
     -fx-pref-height: 0;
-    -fx-max-height: 0;
+    -fx-max-height: 0; */
+
+    -fx-hbar-policy: never;
+    -fx-background-color: #787673;
+    -fx-pref-width: 15;
 }
+.table-view .scroll-bar .thumb{ -fx-background-color: #787673; }
+.table-view .text{ -fx-text-fill: white; }
+.table-view .filler{ -fx-background-color: #787673; }
+.corner{ -fx-background-color: #3d3d3d; }
 
 .label{
     -fx-text-fill: #ffffff;
