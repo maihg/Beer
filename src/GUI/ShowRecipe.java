@@ -10,6 +10,7 @@ import javafx.scene.control.*;
 import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.VBox;
+import org.apache.commons.lang3.text.WordUtils;
 
 import java.time.LocalDateTime;
 
@@ -29,7 +30,7 @@ public class ShowRecipe {
         Label title1 = new Label("Instruksjoner");
         title1.setId("Subtitle");
         TableView<Instructions> tableView = createTable();
-        Button changeInstructionBtn = new Button("Endre instruksjon"); // Knapp her for å endre på instruksjoner
+        Button changeInstructionBtn = new Button("Endre instruksjon"); // Knapp her for å endre på instruksjoner // Q: ha denne funksjonaliteten??
         Label title2 = new Label("Alle ferdige mekkinger av denne ølen");
         title2.setId("Subtitle");
         TableView<Beer> oldMakingsTable = createTableOldMakings();
@@ -48,7 +49,7 @@ public class ShowRecipe {
         });
 
         VBox centerBox = new VBox(10);
-        centerBox.getChildren().addAll(type, title1, tableView, changeInstructionBtn, title2, oldMakingsTable, title3, notesArea, updateNotes);
+        centerBox.getChildren().addAll(type, title1, tableView, new Label(""), title2, oldMakingsTable, title3, notesArea, updateNotes);
         ScrollPane scrollPane = new ScrollPane(centerBox);
         scrollPane.setHbarPolicy(ScrollPane.ScrollBarPolicy.NEVER);
         scrollPane.setVbarPolicy(ScrollPane.ScrollBarPolicy.ALWAYS);
@@ -66,6 +67,27 @@ public class ShowRecipe {
         // Set up the columns
         TableColumn<Instructions, String> descriptionColumn = new TableColumn<>("Hva");
         descriptionColumn.setCellValueFactory(new PropertyValueFactory<>("description"));
+        descriptionColumn.setCellFactory(column->{
+            return new TableCell<Instructions, String>() {
+                @Override
+                protected void updateItem(String item, boolean empty) {
+                    super.updateItem(item, empty);
+                    if(item==null || empty) {
+                        setGraphic(null);
+                    } else {
+                        // NB: dette funker ift til å få flere linjer, men wrapLength er lik om det er lite eller stort vindu
+                        //     Funker ikke med fixedCellSize for å regne ut høyden på tabellen nå
+                        VBox vbox = new VBox();
+                        String F = WordUtils.wrap(item, 45);
+                        String[] F1 =  F.split(System.lineSeparator());
+                        for(String s: F1){
+                            vbox.getChildren().add(new Label(s));
+                        }
+                        setGraphic(vbox);
+                    }
+                }
+            };
+        });
         TableColumn<Instructions, Integer> daysColumn = new TableColumn<>("Dager etter start");
         daysColumn.setCellValueFactory(new PropertyValueFactory<>("daysAfterStart"));
         daysColumn.setStyle("-fx-alignment: center;");
@@ -79,12 +101,13 @@ public class ShowRecipe {
         TableView<Instructions> tableView = new TableView<>();
         tableView.setItems(FXCollections.observableArrayList(register.getInstructionsForBeer(beerName)));
         tableView.getColumns().addAll(descriptionColumn, daysColumn, hoursColumn);
-        tableView.setFixedCellSize(25);
-        tableView.prefHeightProperty().bind(tableView.fixedCellSizeProperty().multiply(Bindings.size(tableView.getItems()).add(1.10)));
+        //tableView.setFixedCellSize(25);
+        //tableView.prefHeightProperty().bind(tableView.fixedCellSizeProperty().multiply(Bindings.size(tableView.getItems()).add(1.10)));
         tableView.setColumnResizePolicy( TableView.CONSTRAINED_RESIZE_POLICY );
         descriptionColumn.setMaxWidth( 1f * Integer.MAX_VALUE * 50 ); // 50% width
         daysColumn.setMaxWidth( 1f * Integer.MAX_VALUE * 30 ); // 30% width
         hoursColumn.setMaxWidth( 1f * Integer.MAX_VALUE * 20 ); // 20% width
+        tableView.setPrefHeight(200);
 
         return tableView;
     }

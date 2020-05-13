@@ -15,6 +15,7 @@ import javafx.scene.control.*;
 import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.scene.input.MouseButton;
 import javafx.scene.layout.*;
+import org.apache.commons.lang3.text.WordUtils;
 
 import java.time.LocalDateTime;
 
@@ -201,6 +202,27 @@ public class ShowMaking {
         // Set up the columns
         TableColumn<Instructions, String> descriptionColumn = new TableColumn<>("Hva");
         descriptionColumn.setCellValueFactory(new PropertyValueFactory<>("description"));
+        descriptionColumn.setCellFactory(column->{
+            return new TableCell<Instructions, String>() {
+                @Override
+                protected void updateItem(String item, boolean empty) {
+                    super.updateItem(item, empty);
+                    if(item==null || empty) {
+                        setGraphic(null);
+                    } else {
+                        // NB: dette funker ift til å få flere linjer, men wrapLength er lik om det er lite eller stort vindu
+                        //     Funker ikke med fixedCellSize for å regne ut høyden på tabellen nå
+                        VBox vbox = new VBox();
+                        String F = WordUtils.wrap(item, 45);
+                        String[] F1 =  F.split(System.lineSeparator());
+                        for(String s: F1){
+                            vbox.getChildren().add(new Label(s));
+                        }
+                        setGraphic(vbox);
+                    }
+                }
+            };
+        });
         TableColumn<Instructions, LocalDateTime> whenColumn = new TableColumn<>("Når");
         whenColumn.setCellValueFactory(data -> new ReadOnlyObjectWrapper<>(register.findSpecificInstruction(data.getValue().getInstructionId(), selectedBeer.getId()).isDelay() ? selectedBeer.getStartTime().plusDays(data.getValue().getDaysAfterStart()).plusDays(plusDays).plusHours(data.getValue().getHours()):selectedBeer.getStartTime().plusDays(data.getValue().getDaysAfterStart()).plusHours(data.getValue().getHours())));
         //daysColumn.setStyle("-fx-alignment: center;");
@@ -217,14 +239,15 @@ public class ShowMaking {
         TableView<Instructions> tableView = new TableView<>();
         tableView.setItems(getTableWrapper());
         tableView.getColumns().addAll(descriptionColumn, whenColumn, doneColumn, delayColumn);
-        tableView.setFixedCellSize(25);
-        tableView.prefHeightProperty().bind(tableView.fixedCellSizeProperty().multiply(Bindings.size(tableView.getItems()).add(1.10)));
+        //tableView.setFixedCellSize(25);
+        //tableView.prefHeightProperty().bind(tableView.fixedCellSizeProperty().multiply(Bindings.size(tableView.getItems()).add(1.10)));
         tableView.setColumnResizePolicy( TableView.CONSTRAINED_RESIZE_POLICY );
         descriptionColumn.setMaxWidth( 1f * Integer.MAX_VALUE * 50 ); // 50% width
         whenColumn.setMaxWidth( 1f * Integer.MAX_VALUE * 20 ); // 30% width
         doneColumn.setMaxWidth( 1f * Integer.MAX_VALUE * 20 ); // 20% width
         delayColumn.setMaxWidth( 1f * Integer.MAX_VALUE * 10);
         tableView.setMinWidth(460);
+        tableView.setPrefHeight(300);
 
         // Add listener for clicks on row
         tableView.setOnMouseClicked(mouseEvent -> {

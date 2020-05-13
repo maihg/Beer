@@ -2,9 +2,10 @@ package beer;
 
 import javax.persistence.Entity;
 import javax.persistence.Id;
+import java.io.Serializable;
 
 @Entity
-public class Notes {
+public class Notes implements Serializable {
     @Id
     private String beerName;
     private String notes;

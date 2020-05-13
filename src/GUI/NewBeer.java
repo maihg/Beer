@@ -116,22 +116,6 @@ public class NewBeer {
         scrollBox.setVbarPolicy(ScrollPane.ScrollBarPolicy.AS_NEEDED);
         scrollBox.setFitToWidth(true);
 
-
-        // TODO: planen
-        //  - opprett Beer-Object med tom konstruktør, eller sånn her new Beer("temp%20Name", "temp%20type", startTime);
-        //  - opprett Instructions-objekter og bruk navn="temp%20Name"
-        //  - legg Instructions-objektene i en List i bakgrunnen (som så brukes til å fylle en tabell)
-        //  - la folk legge til og endre på Instructions-objektene, samt fjerne objekter fra lista i bakrunnen (marker øl i lista før endre og slett)
-        //  - når folk trykker på "Klar, ferdig, mekk!"
-        //      * sjekk om navnet er ledig og ok (foreslå <ønsket_navn>#<tall>, <ønsket_navn>_v2.0 eller et helt nytt forsøk)
-        //          - if(getAllBeerTypes().contains(<ønsket_navn>) dialog.display();
-        //      * beerObj.setName(nameField.getText())
-        //      * beerObj.setType(typeField.getText())
-        //      * register.addNewBeer(beerObj)
-        //      * instructionsList.foreach(instr -> register.addInstructionToBeer(instr.getDescription(), instr.getDaysAfterStart(), instr.getHours(), beerObj.getName()))
-        //      * add specific instructions (see Home --> makeAgainBtn.setOnAction())
-        //      * goToShowMaking(event, beerObj) [event fra trykket på knappen]
-
         pane.setTop(title);
         pane.setCenter(scrollBox);
         BorderPane.setAlignment(title, Pos.TOP_CENTER);
@@ -159,7 +143,7 @@ public class NewBeer {
     private TableView<Instructions> createTable(){
         // Set up the columns
         TableColumn<Instructions, String> descriptionColumn = new TableColumn<>("Hva");
-        descriptionColumn.setCellValueFactory(new PropertyValueFactory<>("description")); // Q: Hvordan få til flere linjer på en rad??
+        descriptionColumn.setCellValueFactory(new PropertyValueFactory<>("description"));
         descriptionColumn.setCellFactory(column->{
             return new TableCell<Instructions, String>() {
                 @Override
@@ -169,7 +153,7 @@ public class NewBeer {
                         setGraphic(null);
                     } else {
                         // NB: dette funker ift til å få flere linjer, men wrapLength er lik om det er lite eller stort vindu
-                        //     Funker ikke med fixedCellSize for å regne ut høyden på tabellen nå...
+                        //     Funker ikke med fixedCellSize for å regne ut høyden på tabellen nå
                         VBox vbox = new VBox();
                         String F = WordUtils.wrap(item, 45);
                         String[] F1 =  F.split(System.lineSeparator());
@@ -205,7 +189,7 @@ public class NewBeer {
         descriptionColumn.setMaxWidth( 1f * Integer.MAX_VALUE * 50 ); // 50% width
         daysColumn.setMaxWidth( 1f * Integer.MAX_VALUE * 30 ); // 30% width
         hoursColumn.setMaxWidth( 1f * Integer.MAX_VALUE * 20 ); // 20% width
-        tableView.setPrefHeight(150); //300 ok
+        tableView.setPrefHeight(300);
 
         // Add listener for clicks on row
         tableView.setOnMouseClicked(mouseEvent -> {

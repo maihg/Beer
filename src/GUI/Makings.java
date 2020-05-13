@@ -2,6 +2,7 @@ package GUI;
 
 import beer.Beer;
 import beer.BeerRegister;
+import beer.Instructions;
 import javafx.beans.binding.Bindings;
 import javafx.beans.property.ReadOnlyObjectWrapper;
 import javafx.beans.property.ReadOnlyStringWrapper;
@@ -12,9 +13,7 @@ import javafx.scene.control.*;
 import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.VBox;
-import javafx.scene.text.Font;
-import javafx.scene.text.FontPosture;
-import javafx.scene.text.FontWeight;
+import org.apache.commons.lang3.text.WordUtils;
 
 import java.time.LocalDateTime;
 
@@ -53,6 +52,27 @@ public class Makings {
         TableColumn<Beer, String> daysColumn = new TableColumn<>("Hva");
         daysColumn.setCellValueFactory(data -> new ReadOnlyStringWrapper(register.getNextInstructionDescription(data.getValue())));
         //daysColumn.setMinWidth(200);
+        descriptionColumn.setCellFactory(column->{
+            return new TableCell<Beer, String>() {
+                @Override
+                protected void updateItem(String item, boolean empty) {
+                    super.updateItem(item, empty);
+                    if(item==null || empty) {
+                        setGraphic(null);
+                    } else {
+                        // NB: dette funker ift til å få flere linjer, men wrapLength er lik om det er lite eller stort vindu
+                        //     Funker ikke med fixedCellSize for å regne ut høyden på tabellen nå
+                        VBox vbox = new VBox();
+                        String F = WordUtils.wrap(item, 45);
+                        String[] F1 =  F.split(System.lineSeparator());
+                        for(String s: F1){
+                            vbox.getChildren().add(new Label(s));
+                        }
+                        setGraphic(vbox);
+                    }
+                }
+            };
+        });
         TableColumn<Beer, LocalDateTime> hoursColumn = new TableColumn<>("Dato");
         hoursColumn.setCellValueFactory(data -> new ReadOnlyObjectWrapper<>(register.getNextInstructionDate(data.getValue())));
         hoursColumn.setMinWidth(110);
@@ -66,12 +86,13 @@ public class Makings {
             tableView.setItems(FXCollections.observableArrayList(register.getComingBeers()));
         }
         tableView.getColumns().addAll(descriptionColumn, daysColumn, hoursColumn);
-        tableView.setFixedCellSize(25);
-        tableView.prefHeightProperty().bind(tableView.fixedCellSizeProperty().multiply(Bindings.size(tableView.getItems()).add(1.10)));
+        //tableView.setFixedCellSize(25);
+        //tableView.prefHeightProperty().bind(tableView.fixedCellSizeProperty().multiply(Bindings.size(tableView.getItems()).add(1.10)));
         tableView.setColumnResizePolicy( TableView.CONSTRAINED_RESIZE_POLICY );
         descriptionColumn.setMaxWidth( 1f * Integer.MAX_VALUE * 50 ); // 50% width
         daysColumn.setMaxWidth( 1f * Integer.MAX_VALUE * 30 ); // 30% width
         hoursColumn.setMaxWidth( 1f * Integer.MAX_VALUE * 20 ); // 20% width
+        tableView.setPrefHeight(300);
 
         // Add listener for clicks on row
         tableView.setOnMousePressed(mouseEvent -> {
