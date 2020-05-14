@@ -16,6 +16,11 @@ CSS -- STYLING OF THE APPLICATION
     -fx-text-fill: darkorange;
     -fx-text-alignment: center;
 }
+#Placeholder{
+    -fx-text-fill: white;
+    -fx-text-alignment: center;
+    -fx-wrap-text: true;
+}
 
 /* ScrollPane - removing border */
 .scroll-pane > .viewport {
@@ -100,9 +105,11 @@ CSS -- STYLING OF THE APPLICATION
 
     -fx-hbar-policy: never;
     -fx-background-color: #787673;
-    -fx-pref-width: 15;
+    -fx-pref-width: 13;
 }
-.table-view .scroll-bar .thumb{ -fx-background-color: #787673; }
+.table-view .scroll-bar .thumb{ -fx-background-color: #3d3d3d; -fx-pref-width: 10; }
+.table-view .scroll-bar .track{ -fx-pref-width: 10; }
+/*.table-view  .increment-button, .table-view .decrement-button{ -fx-background-radius: 1em; }*/
 .table-view .text{ -fx-text-fill: white; }
 .table-view .filler{ -fx-background-color: #787673; }
 .corner{ -fx-background-color: #3d3d3d; }

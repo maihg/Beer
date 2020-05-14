@@ -90,6 +90,9 @@ public class Home {
         tableView.setItems(getHomeTableWrapper());
         tableView.getColumns().addAll(beerNameColumn, beerTypeColumn, timesMadeColumn);
         tableView.setStyle("-fx-wrap-text: true");
+        Label text = new Label("Trykk på 'Lag ny mekk' for å komme i gang med å fylle tabellene :)");
+        text.setId("Placeholder");
+        tableView.setPlaceholder(text);
         tableView.setFixedCellSize(25);
         tableView.prefHeightProperty().bind(tableView.fixedCellSizeProperty().multiply(Bindings.size(tableView.getItems()).add(1.10)));
         tableView.setColumnResizePolicy( TableView.CONSTRAINED_RESIZE_POLICY );
@@ -196,7 +199,6 @@ public class Home {
                 ref.dateTime = LocalDateTime.parse(startTimeField.getText()); // Fort gjort å skrive inn feil, så har lagt dette inn i en try-catch
                 if(ref.dateTime.getYear() > 2050) throw new IllegalArgumentException();
                 Controller.goToNewBeer(e, ref.dateTime);
-                // TODO: double check that we don't need updateTable() here
                 stage.close();
 
             }catch (IllegalArgumentException illEx){

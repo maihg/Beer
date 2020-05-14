@@ -49,6 +49,7 @@ public class ShowRecipe {
         });
 
         VBox centerBox = new VBox(10);
+        centerBox.setPadding(new Insets(0,7,0,0));
         centerBox.getChildren().addAll(type, title1, tableView, new Label(""), title2, oldMakingsTable, title3, notesArea, updateNotes);
         ScrollPane scrollPane = new ScrollPane(centerBox);
         scrollPane.setHbarPolicy(ScrollPane.ScrollBarPolicy.NEVER);

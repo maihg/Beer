@@ -2,8 +2,6 @@ package GUI;
 
 import beer.Beer;
 import beer.BeerRegister;
-import beer.Instructions;
-import javafx.beans.binding.Bindings;
 import javafx.beans.property.ReadOnlyObjectWrapper;
 import javafx.beans.property.ReadOnlyStringWrapper;
 import javafx.collections.FXCollections;
@@ -37,7 +35,7 @@ public class Makings {
         centerScroll.setVbarPolicy(ScrollPane.ScrollBarPolicy.AS_NEEDED);
         centerScroll.setFitToWidth(true);
         pane.setTop(title);
-        pane.setCenter(centerBox);
+        pane.setCenter(centerScroll);
         BorderPane.setAlignment(title, Pos.TOP_CENTER);
         pane.setPadding(new Insets(10,10,10,10));
 
@@ -86,6 +84,9 @@ public class Makings {
             tableView.setItems(FXCollections.observableArrayList(register.getComingBeers()));
         }
         tableView.getColumns().addAll(descriptionColumn, daysColumn, hoursColumn);
+        Label text = new Label("Trykk på 'Lag ny mekk' på forsiden for å lage mekk som så kan vises her");
+        text.setId("Placeholder");
+        tableView.setPlaceholder(text);
         //tableView.setFixedCellSize(25);
         //tableView.prefHeightProperty().bind(tableView.fixedCellSizeProperty().multiply(Bindings.size(tableView.getItems()).add(1.10)));
         tableView.setColumnResizePolicy( TableView.CONSTRAINED_RESIZE_POLICY );

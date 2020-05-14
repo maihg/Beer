@@ -161,6 +161,29 @@ public class BeerRegister implements Serializable {
         }
     }
 
+    public void deleteBeer(Beer beer){
+        // Delete all specific instructions connected to this Beer-object
+        deleteAllSpecificInstructions(beer.getId());
+        EntityManager em = getEM();
+        try {
+            // If it is the only Beer-object with that beerName, delete the notes (general for that beer) from Notes
+            if(noOfTimesMade(beer.getName()) == 1){
+                em.getTransaction().begin();
+                Query q = em.createQuery("DELETE FROM Notes o WHERE o.beerName LIKE :name").setParameter("name", beer.getName());
+                q.executeUpdate();
+                em.getTransaction().commit();
+            }
+            // Delete the Beer-object itself
+            em.getTransaction().begin();
+            Beer current = beer;
+            if(!em.contains(beer)){ current = em.merge(beer);}
+            em.remove(current);
+            em.getTransaction().commit();
+        }finally {
+            closeEM(em);
+        }
+    }
+
     // TODO: decide whether or not to delete this method... only used in the BeerRegister.main()
     public boolean regValues(Beer beer, double value, int valType){
         // Legg til verdi i beer-objektet dag 1 (value1) eller dag 2 (value2)
@@ -400,6 +423,17 @@ public class BeerRegister implements Serializable {
         return instructions;
     }
 
+    private void deleteAllSpecificInstructions(int beerId){
+        EntityManager em = getEM();
+        try {
+            em.getTransaction().begin();
+            Query q = em.createQuery("DELETE FROM SpecificInstruction o WHERE o.beerId = (:id)").setParameter("id", beerId);
+            //q.executeUpdate();
+            em.getTransaction().commit();
+        }finally {
+            closeEM(em);
+        }
+    }
 
     // METHODS FOR NOTES - NOTES-CLASS
     // NB: These three notes methods are connected to the Notes-class and are general for a type of beer (e.g. "Sommerøl")

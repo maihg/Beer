@@ -4,7 +4,6 @@ import beer.Beer;
 import beer.BeerRegister;
 import beer.Instructions;
 import beer.SpecificInstruction;
-import javafx.beans.binding.Bindings;
 import javafx.beans.property.ReadOnlyObjectWrapper;
 import javafx.beans.property.ReadOnlyStringWrapper;
 import javafx.collections.FXCollections;
@@ -18,6 +17,7 @@ import javafx.scene.layout.*;
 import org.apache.commons.lang3.text.WordUtils;
 
 import java.time.LocalDateTime;
+import java.util.Optional;
 
 public class ShowMaking {
     private final BorderPane pane = new BorderPane();
@@ -61,12 +61,23 @@ public class ShowMaking {
             dialog.display();
         });
         GridPane valuesPane = getValuesPane();
+        Button deleteMakingBtn = new Button("**");
+        deleteMakingBtn.setOnAction(e -> {
+            if(selectedBeer == null) return;
+            Dialog dialog = new Dialog("confirm", "Slett mekking?", "Vil du slette denne mekkingen? Handlingen kan ikke angres");
+            dialog.display();
+            if(dialog.isYesNo()){
+                register.deleteBeer(selectedBeer);
+                Controller.goBack(e);
+            }
+        });
+
 
         HBox delayBox = new HBox(5);
         delayBox.getChildren().addAll(delayLbl, increaseField, increaseDelay);
         delayBox.setAlignment(Pos.CENTER_LEFT);
         VBox centerBox = new VBox(10);
-        centerBox.getChildren().addAll(tableView, delayBox, notesArea,updateNotes, valuesPane);
+        centerBox.getChildren().addAll(tableView, delayBox, notesArea,updateNotes, valuesPane, deleteMakingBtn);
         ScrollPane scrollPane = new ScrollPane(centerBox);
         scrollPane.setHbarPolicy(ScrollPane.ScrollBarPolicy.NEVER);
         scrollPane.setVbarPolicy(ScrollPane.ScrollBarPolicy.AS_NEEDED);

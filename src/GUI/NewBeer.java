@@ -4,7 +4,6 @@ import beer.Beer;
 import beer.BeerRegister;
 import beer.Instructions;
 import beer.SpecificInstruction;
-import javafx.beans.property.SimpleDoubleProperty;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.geometry.Insets;
@@ -14,8 +13,6 @@ import javafx.scene.control.*;
 import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.scene.input.MouseButton;
 import javafx.scene.layout.*;
-import javafx.scene.text.Text;
-import javafx.scene.text.TextAlignment;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
 import org.apache.commons.lang3.text.WordUtils;
@@ -176,9 +173,9 @@ public class NewBeer {
 
         // Create the table instance
         TableView<Instructions> tableView = new TableView<>();
-        Label placeHolderTxt = new Label("Legg til din første instruksjon ved å trykke på knappen 'Legg til instruksjon' \nunder. " +
-                "Instruksjonene blir vist i en liste her og lagres \nved å trykke på knappen 'Klar, ferdig, mekk!'");
-        placeHolderTxt.setTextAlignment(TextAlignment.CENTER);
+        Label placeHolderTxt = new Label("Legg til din første instruksjon ved å trykke på knappen 'Legg til instruksjon' under. " +
+                "Instruksjonene blir vist i en liste her og lagres ved å trykke på knappen 'Klar, ferdig, mekk!'");
+        placeHolderTxt.setId("Placeholder");
         tableView.setPlaceholder(placeHolderTxt);
         tableView.setItems(getTableWrapper());
         tableView.getColumns().addAll(descriptionColumn, daysColumn, hoursColumn);
