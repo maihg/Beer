@@ -17,7 +17,7 @@
 
             <property name="eclipselink.target-database" value="Derby"/>
             <property name="eclipselink.ddl-generation" value="create-tables"/> <!-- Fjern drop-and hvis du ikke vil nulle ut ting hver gang-->
-            <property name="eclipselink.logging.level" value="INFO"/> <!-- FINE, INFO, ALL -->
+            <property name="eclipselink.logging.level" value="SEVERE"/> <!-- FINE, INFO, ALL, WARNING, SEVERE -->
         </properties>
     </persistence-unit>
 
