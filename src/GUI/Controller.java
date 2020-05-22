@@ -17,6 +17,7 @@ import javax.persistence.EntityManagerFactory;
 import javax.persistence.Persistence;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
+import java.util.logging.Logger;
 
 
 // This will be my GUI.Controller-class
@@ -58,7 +59,8 @@ public class Controller extends Application {
         Button goBackBtn = new Button("<-- Tilbake");
         goBackBtn.setOnAction(Controller::goBack);
         VBox topV = new VBox(homeBtn, goBackBtn);
-        Button fileHandleBtn = new Button("Filhåndtering");
+        Button fileHandleBtn = new Button("...");
+        fileHandleBtn.setDisable(true);
         Region region = new Region();
         HBox.setHgrow(region, Priority.ALWAYS);
         HBox top = new HBox(topV, region, fileHandleBtn);
@@ -150,10 +152,9 @@ public class Controller extends Application {
                 // Should not be able to go back to the newBeer-scene
             case "stay":
                 // User is at home page and there is no need for switching view
-                System.out.println("staying");
                 break;
             default:
-                System.out.println("Couldn't find a last scene to go to");
+                Logger.getGlobal().info("Couldn't find a last scene to go to");
                 break;
         }
 
@@ -161,7 +162,7 @@ public class Controller extends Application {
 
     private static boolean checkConfirmation(){
         if(newScene.equals("newBeer")){
-            Dialog dialog = new Dialog("confirm", "Obs!", "Hvis du går ut nå vil du miste det du har gjort. Gå ut alikevel?");
+            Dialog dialog = new Dialog("confirm", "Obs!", "Hvis du går ut nå vil du miste det du har gjort. Gå ut allikevel?");
             dialog.display();
             return dialog.isYesNo();
         }

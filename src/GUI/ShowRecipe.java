@@ -126,12 +126,13 @@ public class ShowRecipe {
         TableView<Beer> tableView = new TableView<>();
         tableView.setItems(FXCollections.observableArrayList(register.getMakingsOfType(beerName)));
         tableView.getColumns().addAll(nameColumn, startColumn, abvColumn);
-        tableView.setFixedCellSize(25);
-        tableView.prefHeightProperty().bind(tableView.fixedCellSizeProperty().multiply(Bindings.size(tableView.getItems()).add(1.10)));
+        //tableView.setFixedCellSize(25);
+        //tableView.prefHeightProperty().bind(tableView.fixedCellSizeProperty().multiply(Bindings.size(tableView.getItems()).add(1.10)));
         tableView.setColumnResizePolicy( TableView.CONSTRAINED_RESIZE_POLICY );
         nameColumn.setMaxWidth( 1f * Integer.MAX_VALUE * 50 ); // 50% width
         startColumn.setMaxWidth( 1f * Integer.MAX_VALUE * 30 ); // 50% width
         abvColumn.setMaxWidth( 1f * Integer.MAX_VALUE * 20);
+        tableView.setPrefHeight(200);
 
         // Add listener for clicks on row
         tableView.setOnMousePressed(mouseEvent -> {
@@ -141,7 +142,6 @@ public class ShowRecipe {
                 if(mouseEvent.getClickCount() == 1){
                     selectedBeer = selected;
                 }else if(mouseEvent.getClickCount() == 2){
-                    System.out.println("--> Gonna go to specific making ");
                     Controller.goToShowMaking(mouseEvent, selectedBeer);
                 }
             }

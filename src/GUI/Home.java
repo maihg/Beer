@@ -5,7 +5,6 @@ import beer.BeerRegister;
 import beer.Instructions;
 import beer.SpecificInstruction;
 import javafx.application.Platform;
-import javafx.beans.binding.Bindings;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.geometry.Insets;
@@ -18,7 +17,6 @@ import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
-
 import java.time.LocalDateTime;
 
 
@@ -37,7 +35,6 @@ public class Home {
         tableView = createHomeTable();
         Button newMakingBtn = new Button("Ny mekking");
         newMakingBtn.setOnAction(e -> {
-            System.out.println(selectedBeerName);
             showNewMakingWindow();
         });
         Button ongoingMakingsBtn = new Button("Se pågående mekkinger");
@@ -93,12 +90,13 @@ public class Home {
         Label text = new Label("Trykk på 'Lag ny mekk' for å komme i gang med å fylle tabellene :)");
         text.setId("Placeholder");
         tableView.setPlaceholder(text);
-        tableView.setFixedCellSize(25);
-        tableView.prefHeightProperty().bind(tableView.fixedCellSizeProperty().multiply(Bindings.size(tableView.getItems()).add(1.10)));
+        //tableView.setFixedCellSize(25);
+        //tableView.prefHeightProperty().bind(tableView.fixedCellSizeProperty().multiply(Bindings.size(tableView.getItems()).add(1.10)));
         tableView.setColumnResizePolicy( TableView.CONSTRAINED_RESIZE_POLICY );
         beerNameColumn.setMaxWidth( 1f * Integer.MAX_VALUE * 50 ); // 50% width
         beerTypeColumn.setMaxWidth( 1f * Integer.MAX_VALUE * 30 ); // 30% width
         timesMadeColumn.setMaxWidth( 1f * Integer.MAX_VALUE * 20 ); // 20% width
+        tableView.setPrefHeight(298);
 
 
         // Add listener for clicks on row
@@ -111,7 +109,6 @@ public class Home {
                     selectedBeerName = beerName;
                     selectedBeerType = beerType;
                 }else if(mouseEvent.getClickCount() == 2){
-                    System.out.println("--> Gonna show you the recipe for " + selectedBeerName);
                     Controller.goToShowRecipe(mouseEvent, selectedBeerName);
                 }
             }
@@ -148,7 +145,6 @@ public class Home {
         TextField startTimeField = new TextField();
         startTimeField.setPromptText("åååå-mm-ddThh:mm");
         //startTimeField.setFocusTraversable(false); // Alternativ til Platform.runLater-greia
-        System.out.println(startTimeField.getText());
         Button makeAgainBtn = new Button("Lag markert øl");
         Button makeNewBtn = new Button("Lag ny type øl");
         HBox startBox = new HBox(startTime, startTimeField);
@@ -159,19 +155,18 @@ public class Home {
         contents.setAlignment(Pos.CENTER);
 
 
-        var ref = new Object() {
+        /*var ref = new Object() {
             LocalDateTime dateTime;
-        };
+        };*/
+        LocalDateTime[] ref = new LocalDateTime[1];
         makeAgainBtn.setOnAction(e -> {
             try {
-                ref.dateTime = LocalDateTime.parse(startTimeField.getText()); // Fort gjort å skrive inn feil, så har lagt dette inn i en try-catch
-                if(ref.dateTime.getYear() > 2050) throw new IllegalArgumentException();
+                ref[0] = LocalDateTime.parse(startTimeField.getText()); // Fort gjort å skrive inn feil, så har lagt dette inn i en try-catch
+                if(ref[0].getYear() > 2050) throw new IllegalArgumentException();
 
                 if(!(selectedBeerName == null)) {
-                    System.out.println(ref.dateTime);
-                    Beer beer = new Beer(selectedBeerName, selectedBeerType, ref.dateTime);
+                    Beer beer = new Beer(selectedBeerName, selectedBeerType, ref[0]);
                     register.addNewBeer(beer);
-                    System.out.println(beer.getId());
                     for (Instructions instructions : register.getInstructionsForBeer(selectedBeerName)) {
                         //register.addInstructionToBeer(instructions.getDescription(), instructions.getDaysAfterStart(), instructions.getHours(), instructions.getBeerName());
                         register.addSpecificInstruction(new SpecificInstruction(instructions.getInstructionId(), beer.getId()));
@@ -184,10 +179,10 @@ public class Home {
                 }
 
             }catch (IllegalArgumentException illEx){
-                Dialog dialog = new Dialog("info", "For langt frem i tid", "Du har skrevet inn en dato som er for langt frem i tid");
+                Dialog dialog = new Dialog("warning", "For langt frem i tid", "Du har skrevet inn en dato som er for langt frem i tid");
                 dialog.display();
             }catch (Exception ex){
-                Dialog dialog = new Dialog("info", "Feil inndata",
+                Dialog dialog = new Dialog("warning", "Feil inndata",
                         "Det skjedde en feil ved innføring av starttid. Det er viktig at du skriver det akkurat på formen " +
                                 "åååå-MM-ddThh:mm hvor åååå=årstall, MM=månedsnummer, dd=dag, T=bare skriv den, hh=time, mm=minutt");
                 dialog.display();
@@ -196,16 +191,16 @@ public class Home {
 
         makeNewBtn.setOnAction(e -> {
             try{
-                ref.dateTime = LocalDateTime.parse(startTimeField.getText()); // Fort gjort å skrive inn feil, så har lagt dette inn i en try-catch
-                if(ref.dateTime.getYear() > 2050) throw new IllegalArgumentException();
-                Controller.goToNewBeer(e, ref.dateTime);
+                ref[0] = LocalDateTime.parse(startTimeField.getText()); // Fort gjort å skrive inn feil, så har lagt dette inn i en try-catch
+                if(ref[0].getYear() > 2050) throw new IllegalArgumentException();
+                Controller.goToNewBeer(e, ref[0]);
                 stage.close();
 
             }catch (IllegalArgumentException illEx){
-                Dialog dialog = new Dialog("info", "For langt frem i tid", "Du har skrevet inn en dato som er for langt frem i tid");
+                Dialog dialog = new Dialog("warning", "For langt frem i tid", "Du har skrevet inn en dato som er for langt frem i tid");
                 dialog.display();
             }catch (Exception ex){
-                Dialog dialog = new Dialog("info", "Feil inndata",
+                Dialog dialog = new Dialog("warning", "Feil inndata",
                         "Det skjedde en feil ved innføring av starttid. Det er viktig at du skriver det akkurat på formen " +
                                 "åååå-MM-ddThh:mm hvor åååå=årstall, MM=månedsnummer, dd=dag, T=bare skriv den, hh=time, mm=minutt");
                 dialog.display();

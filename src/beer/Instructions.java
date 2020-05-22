@@ -7,16 +7,16 @@ import java.io.Serializable;
 import java.time.LocalDateTime;
 
 @Entity
-public class Instructions implements Serializable {
+public class Instructions implements Serializable, Comparable<Instructions> {
     @Id
     @GeneratedValue
-    private int instructionId; // Trenger vi den? Er vel grei for å klare å finne igjen den
+    private int instructionId;
     private String description;
     private int daysAfterStart;
     private int hours;
     private String beerName;
 
-    public Instructions(){} // Empty
+    public Instructions(){} // Empty because of Java Bean
 
     public Instructions(String description, int daysAfterStart, int hours, String beerName){
         this.description = description;
@@ -42,14 +42,6 @@ public class Instructions implements Serializable {
         this.description = description;
     }
 
-    /*public LocalDateTime getDate() {
-        return date;
-    }
-
-    public void setDate(LocalDateTime date) {
-        this.date = date;
-    }*/
-
     public int getDaysAfterStart() {
         return daysAfterStart;
     }
@@ -72,6 +64,13 @@ public class Instructions implements Serializable {
 
     public void setBeerName(String beerName) {
         this.beerName = beerName;
+    }
+
+    @Override
+    public int compareTo(Instructions o) {
+        String no = "" + daysAfterStart + hours;
+        String noToCompareTo = "" + o.daysAfterStart + o.hours;
+        return Integer.parseInt(no) - Integer.parseInt(noToCompareTo);
     }
 
     @Override

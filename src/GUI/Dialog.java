@@ -1,10 +1,16 @@
 package GUI;
 
+import javafx.geometry.Insets;
 import javafx.scene.control.Alert;
 import javafx.scene.control.ButtonType;
 import javafx.scene.control.DialogPane;
+import javafx.scene.control.Label;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
+import javafx.scene.layout.VBox;
+import javafx.scene.paint.Color;
+import javafx.scene.text.Font;
+import javafx.scene.text.Text;
 
 import java.util.Optional;
 import java.util.logging.Logger;
@@ -32,6 +38,9 @@ public class Dialog {
             case "confirm":
                 displayAlertConfirmation();
                 break;
+            case "warning":
+                displayAlertWarning();
+                break;
             default:
                 Logger.getGlobal().warning("Failed to display dialog");
         }
@@ -40,10 +49,18 @@ public class Dialog {
     private Alert createAlert(){
         Alert alert = new Alert(Alert.AlertType.INFORMATION);
         alert.setHeaderText(title);
-        alert.setContentText(message);
+        Text messageLabel = new Text(message);
+        messageLabel.setFill(Color.WHITE);
+        messageLabel.setWrappingWidth(330);
+        VBox content = new VBox(messageLabel);
+        content.setPadding(new Insets(10,10,10,10));
+        alert.getDialogPane().setContent(content);
+        //alert.setContentText(message);
+        //alert.getDialogPane().setMinWidth(300);
+        alert.getDialogPane().setPrefWidth(350);
         DialogPane alertPane = alert.getDialogPane();
         alertPane.getStylesheets().add("GUI/styles.css");
-        // Add logo
+        // Q: Add logo? If yes, next two lines would do the trick
         //Stage stage = (Stage) alert.getDialogPane().getScene().getWindow();
         //stage.getIcons().add(new Image(getClass().getResource("noenoe").toString()));
         return alert;
@@ -74,13 +91,20 @@ public class Dialog {
         ButtonType btnNo = new ButtonType("Nei");
         alert.getButtonTypes().setAll(btnYes, btnNo);
         Optional<ButtonType> res = alert.showAndWait();
-        if(res.isEmpty()){
+        if(!res.isPresent()){
             this.yesNo = false;
         }else if(res.get() == btnYes){
             this.yesNo = true;
         }else if(res.get() == btnNo){
             this.yesNo = false;
         }
+    }
+
+    private void displayAlertWarning(){
+        Alert alert = createAlert();
+        alert.setAlertType(Alert.AlertType.WARNING);
+        alert.setTitle("Advarsel");
+        alert.show();
     }
 
     public boolean isYesNo() {

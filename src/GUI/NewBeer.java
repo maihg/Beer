@@ -19,6 +19,9 @@ import org.apache.commons.lang3.text.WordUtils;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.logging.Logger;
 
 public class NewBeer {
     private final BorderPane pane = new BorderPane();
@@ -71,9 +74,8 @@ public class NewBeer {
             }
         });
         saveInDBBtn.setOnAction(e -> {
-            System.out.println("Skal lagre alt i DB");
+            Logger.getGlobal().info("Skal lagre alt i DB");
             if(nameField.getText().trim().isEmpty() || typeField.getText().trim().isEmpty()){
-                System.out.println(nameField.getText());
                 Dialog dialog = new Dialog("info", "Navn og type mangler", "Du har glemt å fylle inn navn og type");
                 dialog.display();
             }else if(!instructionsOK()){
@@ -87,9 +89,7 @@ public class NewBeer {
                 dialog.display();
             }else {
                 Beer beer = new Beer(nameField.getText(), typeField.getText(), startTime);
-                System.out.println(beer.toString());
                 register.addNewBeer(beer);
-                System.out.println(register.findBeer(beer).toString());
                 for (Instructions instr : instructionsList) {
                     instr.setBeerName(beer.getName());
                     register.addInstructionToBeer(instr.getDescription(), instr.getDaysAfterStart(), instr.getHours(), beer.getName());
@@ -197,7 +197,6 @@ public class NewBeer {
                     selectedInstruction = selected;
                 }else if(mouseEvent.getClickCount() == 2){
                     //Noe
-                    System.out.println("Du dobbeltklikka på " + selectedInstruction.toString());
                 }
             }
         });
@@ -210,7 +209,12 @@ public class NewBeer {
         return tableWrapper;
     }
     private void updateTable(){
+        sortInstructionsList();
         this.tableWrapper.setAll(instructionsList);
+    }
+
+    private void sortInstructionsList(){
+        Collections.sort(instructionsList);
     }
 
     private void instructionsWindow(String whatToDo){

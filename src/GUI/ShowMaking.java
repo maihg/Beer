@@ -122,16 +122,18 @@ public class ShowMaking {
 
         //DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd hh:mm");
         // Q: Legge til noe formattering på dato? Hvor vanskelig ville det vært å få til det over alt?
-        var ref = new Object() {
+        /*var ref = new Object() {
             LocalDateTime dateTime;
-        };
+        };*/
+        LocalDateTime[] ref = new LocalDateTime[1];
         changeStartTime.setOnAction(e -> {
             try {
-                ref.dateTime = LocalDateTime.parse(changeFieldDay.getText());
-                if(ref.dateTime.getYear() > 2050) throw new IllegalArgumentException();
-                selectedBeer.setStartTime(ref.dateTime);
+                ref[0] = LocalDateTime.parse(changeFieldDay.getText());
+                if(ref[0].getYear() > 2050) throw new IllegalArgumentException();
+                selectedBeer.setStartTime(ref[0]);
                 register.editBeer(selectedBeer);
                 updateTable();
+                new Dialog("info", "Oppdatert", "Ny starttid er registrert. Datoene i tabellen er oppdatert").display();
             }catch (IllegalArgumentException illEx){
                 Dialog dialog = new Dialog("info", "For langt frem i tid", "Du har skrevet inn en dato som er for langt frem i tid");
                 dialog.display();
@@ -143,23 +145,43 @@ public class ShowMaking {
             }
         });
 
+        // NB: disse tre funksjonene sjekker ikke verdien
+        //     dersom noen skriver 1042,67 så er det lovlig selv om det er en dum og urealistisk verdi
         changeVal1Btn.setOnAction(e -> {
-            selectedBeer.setValue1(Double.parseDouble(val1Input.getText()));
-            obs1.setText(val1Input.getText());
-            val1Input.clear();
-            updateValues(ready, 1);
+            try {
+                double val = Double.parseDouble(val1Input.getText());
+                if(!(val == -1.0 || (1.0 <= val && val <= 1.5))) throw new IllegalArgumentException();
+                selectedBeer.setValue1(val);
+                obs1.setText(val1Input.getText());
+                val1Input.clear();
+                updateValues(ready, 1);
+            }catch (Exception ex){
+                new Dialog("warning","Feil i inndata", "Dette feltet kan bare ta desimaltall").display();
+            }
         });
         changeVal2Btn.setOnAction(e -> {
-            selectedBeer.setValue2(Double.parseDouble(val2Input.getText()));
-            obs2.setText(val2Input.getText());
-            val2Input.clear();
-            updateValues(ready, 2);
+            try {
+                double val = Double.parseDouble(val2Input.getText());
+                if(!(val == -1.0 || (1.0 <= val && val <= 1.5))) throw new IllegalArgumentException();
+                selectedBeer.setValue2(val);
+                obs2.setText(val2Input.getText());
+                val2Input.clear();
+                updateValues(ready, 2);
+            }catch (Exception ex){
+                new Dialog("warning","Feil i inndata", "Dette feltet kan bare ta desimaltall").display();
+            }
         });
         changeVal3Btn.setOnAction(e -> {
-            selectedBeer.setOG(Double.parseDouble(val3Input.getText()));
-            obs3.setText(val3Input.getText());
-            val3Input.clear();
-            updateValues(ready, 3);
+            try{
+                double val = Double.parseDouble(val3Input.getText());
+                if(!(val == -1.0 || (1.0 <= val && val <= 1.5))) throw new IllegalArgumentException();
+                selectedBeer.setOG(val);
+                obs3.setText(val3Input.getText());
+                val3Input.clear();
+                updateValues(ready, 3);
+            }catch(Exception ex) {
+                new Dialog("warning", "Feil i inndata", "Dette feltet kan bare ta desimaltall").display();
+            }
         });
 
         GridPane pane = new GridPane();

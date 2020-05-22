@@ -1,19 +1,13 @@
 package beer;
 
-
-import com.mysql.cj.conf.StringProperty;
 import javafx.beans.property.SimpleIntegerProperty;
-import javafx.beans.property.SimpleStringProperty;
 import javafx.beans.value.ObservableValue;
-import javafx.scene.control.cell.PropertyValueFactory;
-
 import javax.persistence.*;
 import java.io.Serializable;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Optional;
 import java.util.logging.Logger;
 
 /**
@@ -128,7 +122,7 @@ public class BeerRegister implements Serializable {
 
 
     // METHODS FOR USE ON BEER-OBJECTS
-    public boolean addNewBeer(Beer beer){
+    public void addNewBeer(Beer beer){
         EntityManager em = getEM();
         try {
             em.getTransaction().begin();
@@ -136,11 +130,9 @@ public class BeerRegister implements Serializable {
             em.getTransaction().commit();
         }catch (IllegalArgumentException e){
             Logger.getGlobal().warning("Couldn't add new beer");
-            return false; // Er dette ok??
         }finally {
             closeEM(em);
         }
-        return true;
     }
 
     public boolean okName(String beerName){
@@ -361,7 +353,7 @@ public class BeerRegister implements Serializable {
         List<Instructions> instructions = null;
         try {
             em.getTransaction().begin();
-            Query q = em.createQuery("SELECT OBJECT(o) FROM Instructions o WHERE o.beerName LIKE :name ORDER BY o.daysAfterStart+o.hours").setParameter("name", beerName);
+            Query q = em.createQuery("SELECT OBJECT(o) FROM Instructions o WHERE o.beerName LIKE :name ORDER BY o.daysAfterStart + o.hours").setParameter("name", beerName);
             // NB: ^er litt usikker på den order by delen, men tror den skal være grei altså (sånn hvis ting blir lagt inn i tilfeldig rekkefølge)
             instructions = q.getResultList();
             em.getTransaction().commit();
@@ -471,6 +463,11 @@ public class BeerRegister implements Serializable {
             closeEM(em);
         }
     }
+
+   /* public void exportToCsv(String tableName, String fileName){
+        EntityManager em = getEM();
+        Query q = em.createQuery("SELECT OBJECT(o) FROM tableName o INTO OUTFILE (fileName) FIELDS TERMINATED BY ';%20'").setParameter("tableName", tableName).setParameter("fileName", fileName);
+    }*/
 
 
     // METHODS CONCERNING THE ENTITY MANANGER FACTORY

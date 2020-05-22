@@ -93,7 +93,7 @@ public class Makings {
         descriptionColumn.setMaxWidth( 1f * Integer.MAX_VALUE * 50 ); // 50% width
         daysColumn.setMaxWidth( 1f * Integer.MAX_VALUE * 30 ); // 30% width
         hoursColumn.setMaxWidth( 1f * Integer.MAX_VALUE * 20 ); // 20% width
-        tableView.setPrefHeight(300);
+        tableView.setPrefHeight(298);
 
         // Add listener for clicks on row
         tableView.setOnMousePressed(mouseEvent -> {
@@ -103,8 +103,6 @@ public class Makings {
                 if(mouseEvent.getClickCount() == 1){
                     selectedBeerName = beer.getName();
                 }else if(mouseEvent.getClickCount() == 2){
-                    System.out.println("--> Gonna show you the progress for " + selectedBeerName);
-                    System.out.println(beer.toString());
                     Controller.goToShowMaking(mouseEvent, beer);
                 }
             }
