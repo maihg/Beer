@@ -1,4 +1,4 @@
-# beer.Beer
+# Beer
 This is my hobby project. I will try to make an amazing application that can
 *  Show what kind of beers that has been made
 *  Let you add new recipes
